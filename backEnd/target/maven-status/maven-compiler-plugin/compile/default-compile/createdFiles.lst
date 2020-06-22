@@ -1,0 +1,4 @@
+com\kockumation\backEnd\controller\HelloWorld.class
+com\kockumation\backEnd\TestWebsocketClient.class
+com\kockumation\backEnd\BackEndApplication.class
+com\kockumation\backEnd\utilities\MySQLJDBCUtil.class

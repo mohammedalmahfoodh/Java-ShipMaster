@@ -1,0 +1,4 @@
+//
+// File Checksum Integrity Verifier version 2.05.
+//
+e2ba3982f4ff4515974dcefb1125a256 dcomw7.reg

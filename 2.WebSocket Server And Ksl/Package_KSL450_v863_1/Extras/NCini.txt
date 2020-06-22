@@ -1,0 +1,5 @@
+# The conf****.ksl file must be edited to match these settings
+## Name,Input,Level,6x(In,Out),Gain,Offs,Type,Addr,Chan,Stat
+#"C1",0,0,0,0,0,0,0,0,0,0,0,0,100000,100000,1,0,8,"29:0",1,0
+
+"Blocksize","1"

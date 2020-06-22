@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<doc>
+<Server wsIP="Any" wsPORT="8089" wsClearIdleSessionInterval="60" wsIdleSessionTimeOut="120" StartupModbusMaster="False" StartupKSL450="True" StartupSmPLC="True"/>
+<Washmaster Database="washmaster.s3db" DefaultPitch="3" EnableHDLCPPP="False" NumberOfMotes="64" AngleThreshold="0" AngleMinDetectLevel="0" AnglePollTime="40000"/>
+<Levelmaster Database="levelmaster.s3db"/>
+ 
+<Shipmaster Database="shipmaster.s3db" SlaveID="1" StartAddress="9899" NumberOfRegs="120" SleepTime="200" PollTime ="2000" mbmIP ="192.168.190.122" mbmPORT="502" mbmPORTAux="1004" NumberOfValves="95" NumberOfPumps="6"/>
+ 
+<DataManager SubscriptionUpdateInterval="1000"/>
+<ModbusMaster SlaveID="1" StartAddress="100" NumberOfRegs="52" SleepTime="1000" mbmIP ="127.0.0.1" mbmPORT="503"/>
+</doc>
+

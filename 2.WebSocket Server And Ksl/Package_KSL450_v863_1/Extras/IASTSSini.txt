@@ -1,0 +1,10 @@
+# ODBC SQL Server Data Source, 
+"Connection","ULSTEIN"
+# User, 
+"UserID","sa"
+# Password, 
+"Password","tyfon"
+# SQL statement for reading, 
+"LCS","SELECT TankNo, TAG, TagDescription, Unit, _Value FROM IASTSS_LCS ORDER BY TankNo, TAG"
+# SQL statement for writing, 
+"IASTSS","LCS_IASTSS"

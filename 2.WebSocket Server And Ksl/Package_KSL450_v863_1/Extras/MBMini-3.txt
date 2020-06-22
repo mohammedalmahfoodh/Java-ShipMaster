@@ -1,0 +1,8 @@
+"Offset","0"
+"Modulo","16"
+"FailPos2","50000"
+"FailPos3","60000"
+"FailPos4","60000"
+"FailPos5","30000"
+"FailPos8","30000"
+"FailPos9","30000"

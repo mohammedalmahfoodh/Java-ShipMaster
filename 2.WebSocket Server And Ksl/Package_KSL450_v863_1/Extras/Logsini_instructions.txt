@@ -1,0 +1,19 @@
+To change the default limits for the ERROR.TXT and TRACE.TXT log files.
+
+Put a file in the app-path folder named Logsini.txt
+
+Example of file contents (2 lines):
+
+"TraceLogSizeLimit","50000"
+"ErrorLogSizeLimit","10000"
+
+Defaults: (if no Logsini.txt is present)
+
+TraceLogSizeLimit = 5000
+ErrorLogSizeLimit = 3000
+
+Values in bytes!
+
+When the limit is reached, the log file will be renamed with the extension .full.txt
+and a new empty log file will be created.
+

@@ -1,0 +1,6 @@
+# Set to 1 to disable the checksum calculation for interface USCUT, 
+"NoCsum","0"
+# Set to 1 to disable the extended message check for interface USCUT, 
+"NoExtChk","0"
+# Set to <> "" to enable the check for sensor abnormal status at the exact value for interface USCUT, 
+"SensorAbnormalStatusCheck","9.999"

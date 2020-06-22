@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TagData>
+	<Tag ID="1">
+		<Type>UI</Type>
+		<Prefix></Prefix>
+		<Dev>KSL</Dev>
+		<DataType>INT</DataType>
+		<Base>40000</Base>
+		<Unit>m</Unit>
+		<Format>##.#</Format>
+	</Tag>
+	<Tag ID="2">
+		<Type>VO</Type>
+		<Prefix></Prefix>
+		<Dev>KSL</Dev>
+		<DataType>INT</DataType>
+		<Base>40100</Base>
+		<Unit>m3</Unit>
+		<Format>#####</Format>
+	</Tag>
+	<Tag ID="3">
+		<Type>WE</Type>
+		<Prefix></Prefix>
+		<Dev>KSL</Dev>
+		<DataType>INT</DataType>
+		<Base>40200</Base>
+		<Unit>t</Unit>
+		<Format>#####</Format>
+	</Tag>
+	<Tag ID="4">
+		<Type>VP</Type>
+		<Prefix></Prefix>
+		<Dev>KSL</Dev>
+		<DataType>INT</DataType>
+		<Base>41000</Base>
+		<Unit>%</Unit>
+		<Format>##.#</Format>
+	</Tag>
+	<Tag ID="5">
+		<Type>DE</Type>
+		<Prefix></Prefix>
+		<Dev>KSL</Dev>
+		<DataType>INT</DataType>
+		<Base>40300</Base>
+		<Unit>t/m3</Unit>
+		<Format>#.###</Format>
+	</Tag>
+	<Tag ID="6">
+		<Type>MT</Type>
+		<Prefix></Prefix>
+		<Dev>KSL</Dev>
+		<DataType>INT</DataType>
+		<Base>40400</Base>
+		<Unit>C</Unit>
+		<Format>###</Format>
+	</Tag>
+	<Tag ID="7">
+		<Type>TL</Type>
+		<Prefix></Prefix>
+		<Dev>KSL</Dev>
+		<DataType>INT</DataType>
+		<Base>40500</Base>
+		<Unit>C</Unit>
+		<Format>###</Format>
+	</Tag>
+	<Tag ID="8">
+		<Type>TM</Type>
+		<Prefix>-1</Prefix>
+		<Dev>-1</Dev>
+		<DataType>INT</DataType>
+		<Base>-1</Base>
+		<Unit>C</Unit>
+		<Format>###</Format>
+	</Tag>
+	<Tag ID="9">
+		<Type>TH</Type>
+		<Prefix></Prefix>
+		<Dev>KSL</Dev>
+		<DataType>INT</DataType>
+		<Base>40600</Base>
+		<Unit>C</Unit>
+		<Format>###</Format>
+	</Tag>
+	<Tag ID="10">
+		<Type>PR</Type>
+		<Prefix></Prefix>
+		<Dev>KSL</Dev>
+		<DataType>INT</DataType>
+		<Base>40700</Base>
+		<Unit>Bar</Unit>
+		<Format>#.###</Format>
+	</Tag>
+	<Tag ID="11">
+		<Type>FR</Type>
+		<Prefix></Prefix>
+		<Dev>KSL</Dev>
+		<DataType>INT</DataType>
+		<Base>40800</Base>
+		<Unit>m3/h</Unit>
+		<Format>###.#</Format>
+	</Tag>
+</TagData>

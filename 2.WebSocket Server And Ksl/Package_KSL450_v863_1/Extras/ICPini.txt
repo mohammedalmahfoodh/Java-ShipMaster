@@ -1,0 +1,6 @@
+# Delay (seconds) between writes for ICP module to accept message - default 0.05, 
+"WriteDelay","0.01"
+# Delay (seconds) between WatchDog writes for ICP module to accept message - default 0.05,
+"WatchDogDelay","0.05"
+# Number of skipped WatchDog writes - default 0,
+"SkipWatchDogUpdate","10"

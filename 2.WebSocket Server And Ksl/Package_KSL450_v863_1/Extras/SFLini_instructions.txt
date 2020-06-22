@@ -1,0 +1,9 @@
+To change the Speedlimit (deadband) default value (0.0001666667) for display of Speed and Flowrate. (from version 1.1.677)
+& Limit the Online indication of Flowrate only by a number of consecutive unipolar readings.
+
+Put a file in the app-path folder named SFLini.txt
+
+Example of file contents (2 lines):
+
+"SpeedLimit","0.00005"
+"FlowCountLimit", "3"

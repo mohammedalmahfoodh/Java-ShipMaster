@@ -1,0 +1,1 @@
+fciv dcomw7.reg >dcomw7.txt

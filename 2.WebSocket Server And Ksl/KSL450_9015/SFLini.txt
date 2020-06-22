@@ -1,0 +1,20 @@
+# Speedlimit (deadband) default value (0.00001666667 * 60 = 0.001 meter/minute) for display of Speed and Flowrate, 
+"SpeedLimit","0.00001666667"
+# Number of consecutive unipolar readings to limit the Online indication of Flowrate avoid change of color in windows Online Monitor when real flow 0.0, 
+"FlowCountLimit","3"
+# Exponential Moving Average Filter (Enable = 1), 
+"EMAFEnable","0"
+# EMAF Constant (a) - The degree of weighting decrease is expressed as a constant smoothing factor a, 
+# a number between 0 and 1, 
+# The smoothing factor may be expressed as a percentage, 
+# so a value of 10% is equivalent to (a) = 0.1, 
+# A higher (a) discounts older observations faster, 
+"EMAFConstant","0.2"
+# EMAF Calculating Interval (mS), 
+"EMAFCalcInterval","10000"
+# Force Calculation Time (S), 
+# If no calculation has been triggered then force calculation at this time, 
+"ForceCalcTime","5"
+# Skip Calculation Time (S), 
+# Skip all calculations up until this time, 
+"SkipCalcTime","0"

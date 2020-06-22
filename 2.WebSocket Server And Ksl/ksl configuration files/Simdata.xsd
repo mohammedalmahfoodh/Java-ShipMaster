@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+	<xsd:simpleType name="TypeType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="Radar"/>
+			<xsd:enumeration value="Press"/>
+			<xsd:enumeration value="Temp"/>
+			<xsd:enumeration value="Incl"/>
+		</xsd:restriction>
+	</xsd:simpleType>	
+	<xsd:simpleType name="EnabledType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="Yes"/>
+			<xsd:enumeration value="No"/>
+		</xsd:restriction>
+	</xsd:simpleType>	
+	<xsd:complexType name="SensorType">
+		<xsd:sequence>
+			<xsd:element name="Type" type="TypeType"/>
+			<xsd:element name="Index" type="xsd:long"/>
+			<xsd:element name="MinValue" type="xsd:float"/>
+			<xsd:element name="MaxValue" type="xsd:float"/>
+			<xsd:element name="TimeUp" type="xsd:string"/>
+			<xsd:element name="TimeAtTop" type="xsd:string"/>
+			<xsd:element name="TimeDown" type="xsd:string"/>
+			<xsd:element name="TimeAtBottom" type="xsd:string"/>
+			<xsd:element name="Enabled" type="EnabledType"/>
+		</xsd:sequence>
+		<xsd:attribute name="ID" type="xsd:string"/>
+	</xsd:complexType>
+	<xsd:element name="SimData" type="SimDataType"/>
+		<xsd:complexType name="SimDataType">
+		<xsd:sequence>
+			<xsd:element name="Sensor" type="SensorType" minOccurs="0" maxOccurs="unbounded"/>
+		</xsd:sequence>
+	</xsd:complexType>	
+</xsd:schema>
+

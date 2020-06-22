@@ -1,0 +1,10 @@
+# Trim and heel limits (Enable = 1),
+"THLEnable","1"
+# Trim maximum in millimeters, 
+"TrimMaxLimit","15123"
+# Trim minimum in millimeters, 
+"TrimMinLimit","-15123"
+# Heel maximum in millimeters, 
+"HeelMaxLimit","5123"
+# Heel minimum in millimeters, 
+"HeelMinLimit","-5123"

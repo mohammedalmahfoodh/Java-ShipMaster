@@ -1,0 +1,18 @@
+
+
+******************** Websocket server installation *****************************
+1) Go to folder Package_KSL450_v863_1 and install KSL450 - run setup.exe.
+
+2) Change permissions on Kockum Sonics folder - users:full
+
+3) From folder ksl configuration files Copy KSL450 - configuration files and paste it in C:\Program Files (x86)\Kockum Sonics\ksl450 folder.
+
+4) Install KS_WebsocketServer.Navigate to folder Install KS_WebsocketServer and install the following files:
+ - vcredist_x86_10_UseThis.exe 
+ - setup.exe 
+ - SetupEchoServer.msi
+5) Replace/Copy websocketServer.exe, generalserverconf.xml, dll's and databases > navigate to folder step 5
+ and copy all files then navigate to folder C:\Program Files (x86)\Kockum Sonics\KS_wsEchoServer and paste the files.
+
+6) Replace/Copy index.html to inetpub wsTestClient .File index.htm located in folder Level_Master_Installation 
+ 

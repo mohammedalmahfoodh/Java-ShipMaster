@@ -1,0 +1,8 @@
+# Set to 1 to disable the checksum calculation for interface MUCP, 
+"NoCsum","0"
+# Set to 1 to disable the extended message check for interface MUCP, 
+"NoExtChk","0"
+# Set to 1 to disable the general (A/N) message check for interface MUCP, 
+"NoGenChk","0"
+# Set to 1 to enable level correction by density for interface MUCP, 
+"DCorr","1"

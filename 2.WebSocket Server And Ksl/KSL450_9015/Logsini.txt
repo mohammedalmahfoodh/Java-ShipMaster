@@ -1,0 +1,4 @@
+# Values in bytes, 
+"TraceLogSizeLimit","80000"
+"ErrorLogSizeLimit","60000"
+"AlarmLogSizeLimit","60000"

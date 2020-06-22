@@ -1,0 +1,8 @@
+"OPCServerName","RSLinx OPC Server"
+"OPCServerName","KEPware.KEPServerEx.V4"
+"OPCServerName","Matrikon.OPC.Simulation"
+"OPCUpdateRate","1000"
+"OPCDeadband","0"
+"OPCTagFilename","OPC_taglist.dat"
+"OPCTagFilename",KEP_OPC_taglist.dat
+"OPCTagFilename",Matrikon_taglist.dat

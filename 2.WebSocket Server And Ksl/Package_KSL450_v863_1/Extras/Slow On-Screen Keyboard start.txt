@@ -1,0 +1,4 @@
+The proxy fix: i.e. from a command prompt C:\> netsh winhttp set proxy proxy.microsoft.com
+
+http://social.technet.microsoft.com/Forums/windows/en-US/0bc87226-c064-49b4-a519-aac91a5c774c/slow-onscreen-keyboard-start?forum=w7itprogeneral
+

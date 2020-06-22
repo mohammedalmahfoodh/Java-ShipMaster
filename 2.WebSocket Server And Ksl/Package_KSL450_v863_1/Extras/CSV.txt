@@ -1,0 +1,14 @@
+CSV Column 1, no error detection = 0, row 1
+"",0,0,0,0,0,0,0,0,0,0,0,0,100,100,1,0,56,"1:0",1,0
+
+CSV Column 2, no error detection = 0, row 1
+"",0,0,0,0,0,0,0,0,0,0,0,0,100,100,1,0,56,"2:0",1,0
+
+CSV Column 1, no error detection = 0, row 2
+"",0,0,0,0,0,0,0,0,0,0,0,0,100,100,1,0,56,"1:0",2,0
+
+CSV Column 1, with error detection type # 1 = 1, row 2
+"",0,0,0,0,0,0,0,0,0,0,0,0,100,100,1,0,56,"1:1",2,0
+
+CSV Column 1, with error detection type # 2 = 2, row 2
+"",0,0,0,0,0,0,0,0,0,0,0,0,100,100,1,0,56,"1:2",2,0

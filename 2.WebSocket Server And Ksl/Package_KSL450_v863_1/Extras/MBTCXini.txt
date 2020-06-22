@@ -1,0 +1,2 @@
+# Set to 1 to disable the 2's complement representation for interface MBTCX, 
+"No2sComplement", "1"

@@ -1,0 +1,4 @@
+# Set to 1 to disable the checksum calculation for interface WE22, 
+"NoCsum","0"
+# Set to 1 to disable the extended message check for interface WE22, 
+"NoExtChk","0"

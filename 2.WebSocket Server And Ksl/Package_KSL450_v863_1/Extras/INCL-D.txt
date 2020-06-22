@@ -1,0 +1,21 @@
+FROM VERSION 733
+
+
+KSLINIT.SET:
+
+"Protocol1","INCL-D"
+"Retrans1","3"
+"Baud1","2400"
+"Params1","E,8,1"
+"Process1","2000"
+
+
+
+CONFXXXX.KSL:
+
+# Inclinometer Sensors
+2
+#
+# Name,Input,Angle,6x(In,Out),Gain,Offs,Type,Addr,Chan,Stat
+"Trim",-.406,-.406,-5,-5,0,0,0,0,0,0,0,0,5,5,1,0,61,"1:1",1,0
+"Heel",.122,.122,-5,-5,0,0,0,0,0,0,0,0,5,5,1,0,61,"1:1",2,0

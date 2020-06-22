@@ -1,0 +1,4 @@
+"OPCServerName","RSLinx OPC Server"
+"OPCUpdateRate","1000"
+"OPCDeadband","0"
+"OPCTagFilename","c:\program files\kockum sonics\ksl450\taglist.dat"

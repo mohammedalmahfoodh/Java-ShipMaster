@@ -1,0 +1,2 @@
+# Set to 1 to disable the automatic Activate Utility, 
+"NoActivateUtility","0"

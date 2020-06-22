@@ -16,6 +16,9 @@ import java.net.URI;
 
 import java.sql.*;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 
 @ClientEndpoint
@@ -24,7 +27,8 @@ public class AllTanksDataFromKsl {
     private final String uri = "ws://localhost:8089";
     private Session session;
     private WebSocketContainer container;
-
+    private ExecutorService executor
+            = Executors.newSingleThreadExecutor();
     public AllTanksDataFromKsl() {
 
         try {
@@ -59,11 +63,10 @@ public class AllTanksDataFromKsl {
     }// Check if data exists in Tanks table *****************************************
 
     // Insert KslTanksData Into Tanks table *****************************************
-    public boolean insertAllKslDataIntoTanks(List<KslTankData> listOfKslTanksData) {
+    public Future<Boolean> insertAllKslDataIntoTanks(List<KslTankData> listOfKslTanksData) {
 
         try (Connection conn = MySQLJDBCUtil.getConnection()) {
 
-            String updateTanks = "UPDATE tanks set code_name = ?,volume = ?,density =? where tank_id = ?;";
             String query = "INSERT INTO tanks (code_name,volume,density) VALUES (?,?,?);";
             PreparedStatement preparedStmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
             int index = 1;
@@ -81,18 +84,22 @@ public class AllTanksDataFromKsl {
                 preparedStmt.setDouble(3, kslTankData.getDensity());
                 int rowAffected = preparedStmt.executeUpdate();
 
-                if (listOfKslTanksData.size() == index){
-                    LavelMasterManager.kslDataInserted = true;
-                }
                 index++;
 
             }
 
-            return true;
         } catch (SQLException ex) {
             System.out.println(ex.getMessage());
-            return false;
+            return executor.submit(() -> {
+
+                return false;
+            });
+
         }
+        return executor.submit(() -> {
+
+            return true;
+        });
 
     }// Insert KslTanksData Into Tanks table *****************************************
 
@@ -157,12 +164,11 @@ public class AllTanksDataFromKsl {
                 KslTanksData kslTanksData = gson.fromJson(message, KslTanksData.class);
                 if (ifDataExists) {
 
-                    updateAllKslDataInTanks(kslTanksData.getSetKslTankData());
+                 //   updateAllKslDataInTanks(kslTanksData.getSetKslTankData());
                 } else {
-                    insertAllKslDataIntoTanks(kslTanksData.getSetKslTankData());
+               //     insertAllKslDataIntoTanks(kslTanksData.getSetKslTankData());
                     System.out.println("No data");
                 }
-
 
                 closeSession();
             }

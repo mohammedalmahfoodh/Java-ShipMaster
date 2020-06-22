@@ -55,6 +55,8 @@ public class LavelMasterManager {
                 client.connectToServer(allTanksDataFromKsl, new URI(uri));
                 allTanksDataFromKsl.sendMessage(getKslTankDataStr);
                 ifWebsocketReady = true;
+           //     kslDataInserted = allTanksDataFromKsl.insertAllKslDataIntoTanks().get();
+
                 allTanksDataFromKsl = null;
 
 
@@ -76,8 +78,8 @@ public class LavelMasterManager {
         try {
             Thread.sleep(2000);
             System.out.println(tankMapData.size());
-            TankSettingsData tankSettingsData = new TankSettingsData();
-            client.connectToServer(tankSettingsData, new URI(uri));
+         //   TankSettingsData tankSettingsData = new TankSettingsData();
+          //  client.connectToServer(tankSettingsData, new URI(uri));
             
 
 
@@ -85,7 +87,7 @@ public class LavelMasterManager {
 
 
 
-        } catch (InterruptedException | URISyntaxException | DeploymentException | IOException e) {
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
         // Get tanks settings     *******************************************************

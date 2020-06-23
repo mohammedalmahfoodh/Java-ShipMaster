@@ -169,11 +169,8 @@ public class AllTanksDataFromKsl {
         try {
             node = mapper.readTree(message);
             if (node.has("setKslTankData")) {
-                System.out.println("Ok");
                 Gson gson = new Gson();
                  kslTanksData = gson.fromJson(message, KslTanksData.class);
-
-                    System.out.println(kslTanksData.getSetKslTankData().get(1));
 
                 closeSession();
                 //  session.close(new CloseReason(CloseCodes.NORMAL_CLOSURE, "Game ended"));

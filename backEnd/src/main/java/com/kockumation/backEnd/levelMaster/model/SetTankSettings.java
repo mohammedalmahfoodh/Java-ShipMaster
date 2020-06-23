@@ -4,13 +4,17 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.kockumation.backEnd.levelMaster.TankSettingsData;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SetTankSettings {
-  TankSettingsData setTankSettingsData= new TankSettingsData();
+    TankSettingData setTankSettingsData= new TankSettingData();
 
-    public TankSettingsData getSetTankSettingsData() {
+    public SetTankSettings() {
+
+    }
+
+    public TankSettingData getSetTankSettingsData() {
         return setTankSettingsData;
     }
 
-    public void setSetTankSettingsData(TankSettingsData setTankSettingsData) {
+    public void setSetTankSettingsData(TankSettingData setTankSettingsData) {
         this.setTankSettingsData = setTankSettingsData;
     }
 }

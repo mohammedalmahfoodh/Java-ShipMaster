@@ -29,20 +29,19 @@ public class AllTanksDataFromKsl {
     private WebSocketContainer container;
     private ExecutorService executor
             = Executors.newSingleThreadExecutor();
-    public AllTanksDataFromKsl() {
+    private KslTanksData kslTanksData;
 
-        try {
-            container = ContainerProvider.
-                    getWebSocketContainer();
-            container.connectToServer(this, new URI(uri));
-
-        } catch (Exception ex) {
-            System.out.println("Websocket not ready start websocket server");
-        }
+    public KslTanksData getKslTanksData() {
+        return kslTanksData;
     }
 
+    public void setKslTanksData(KslTanksData kslTanksData) {
+        this.kslTanksData = kslTanksData;
+    }
+
+
     // Check if data exists in Tanks table *****************************************
-    public Boolean checkIfDataExists() {
+    public Future<Boolean> checkIfDataExists() {
         String sql = "SELECT *  FROM tanks WHERE tank_id=1 ";
         try (Connection conn = MySQLJDBCUtil.getConnection()) {
             Statement stmt = conn.createStatement();
@@ -50,14 +49,23 @@ public class AllTanksDataFromKsl {
 
             if (rs.next()) {
                 //    System.out.println(rs.getString(2));
-                return true;
+                return executor.submit(() -> {
+                    Thread.sleep(2000);
+                    return true;
+                });
             } else {
                 //   System.out.println(rs);
-                return false;
+                return executor.submit(() -> {
+                    Thread.sleep(2000);
+                    return false;
+                });
             }
         } catch (SQLException ex) {
             System.out.println(ex.getMessage());
-            return false;
+            return executor.submit(() -> {
+           //     Thread.sleep(2000);
+                return false;
+            });
         }
 
     }// Check if data exists in Tanks table *****************************************
@@ -97,14 +105,14 @@ public class AllTanksDataFromKsl {
 
         }
         return executor.submit(() -> {
-
+         //  Thread.sleep(3000);
             return true;
         });
 
     }// Insert KslTanksData Into Tanks table *****************************************
 
     // Update All KslTanksData In Tanks table *****************************************
-    public boolean updateAllKslDataInTanks(List<KslTankData> listOfKslTanksData) {
+    public Future<Boolean> updateAllKslDataInTanks() {
 
         try (Connection conn = MySQLJDBCUtil.getConnection()) {
 
@@ -112,7 +120,7 @@ public class AllTanksDataFromKsl {
 
             PreparedStatement preparedStmt = conn.prepareStatement(updateTanks, Statement.RETURN_GENERATED_KEYS);
             int index = 1;
-            for (KslTankData kslTankData : listOfKslTanksData) {
+            for (KslTankData kslTankData : kslTanksData.getSetKslTankData()) {
                 TankDataForMap tankDataForMap = new TankDataForMap();
                 tankDataForMap.setTank_id(index);
                 tankDataForMap.setCode_name(kslTankData.getTankCode());
@@ -127,17 +135,21 @@ public class AllTanksDataFromKsl {
                 int rowAffected = preparedStmt.executeUpdate();
                // System.out.println(rowAffected);
                // System.out.println(index);
-                if (listOfKslTanksData.size() == index){
-                    LavelMasterManager.kslDataInserted = true;
-                    //System.out.println(LavelMasterManager.kslDataInserted);
-                }
+
                 index++;
             }
 
-            return true;
+            return executor.submit(() -> {
+                System.out.println("Tanks table updated");
+              //  Thread.sleep(3000);
+                return true;
+            });
         } catch (SQLException ex) {
             System.out.println(ex.getMessage());
-            return false;
+            return executor.submit(() -> {
+               // Thread.sleep(3000);
+                return false;
+            });
         }
 
     }// Update All KslTanksData In Tanks table *****************************************
@@ -151,9 +163,7 @@ public class AllTanksDataFromKsl {
 
     @OnMessage
     public void onMessage(String message, Session session) throws InterruptedException {
-        //  System.out.println(session.getId());
-        //  System.out.println(message);
-        boolean ifDataExists = checkIfDataExists();
+
         ObjectMapper mapper = new ObjectMapper();
         JsonNode node = null;
         try {
@@ -161,22 +171,16 @@ public class AllTanksDataFromKsl {
             if (node.has("setKslTankData")) {
                 System.out.println("Ok");
                 Gson gson = new Gson();
-                KslTanksData kslTanksData = gson.fromJson(message, KslTanksData.class);
-                if (ifDataExists) {
+                 kslTanksData = gson.fromJson(message, KslTanksData.class);
 
-                 //   updateAllKslDataInTanks(kslTanksData.getSetKslTankData());
-                } else {
-               //     insertAllKslDataIntoTanks(kslTanksData.getSetKslTankData());
-                    System.out.println("No data");
-                }
+                    System.out.println(kslTanksData.getSetKslTankData().get(1));
 
                 closeSession();
+                //  session.close(new CloseReason(CloseCodes.NORMAL_CLOSURE, "Game ended"));
             }
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-
-
     }
 
     public void sendMessage(String message) {
@@ -194,10 +198,14 @@ public class AllTanksDataFromKsl {
     }
 
     @OnClose
-    public void onClose(Session session, CloseReason reason) throws IOException {
+    public Future<Boolean> onClose() throws IOException {
         //prepare the endpoint for closing.
         container = null;
-        System.out.println("Session closed.");
+        System.out.println("KslTankData websocket Session closed.");
+        return executor.submit(() -> {
+            Thread.sleep(1000);
+            return true;
+        });
 
     }
 

@@ -3,7 +3,7 @@ package com.kockumation.backEnd.levelMaster.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class TankSettingsData {
+public class TankSettingData {
 
 
     private int tankId;
@@ -95,5 +95,21 @@ public class TankSettingsData {
 
     public void setDensity(String density) {
         this.density = density;
+    }
+
+    @Override
+    public String toString() {
+        return "TankSettingsData{" +
+                "tankId=" + tankId +
+                ", tankCode='" + tankCode + '\'' +
+                ", tankName='" + tankName + '\'' +
+                ", maxLevel=" + maxLevel +
+                ", maxVolume=" + maxVolume +
+                ", highLevel=" + highLevel +
+                ", highHighLevel=" + highHighLevel +
+                ", lowLevel=" + lowLevel +
+                ", lowLowLevel=" + lowLowLevel +
+                ", density='" + density + '\'' +
+                '}';
     }
 }

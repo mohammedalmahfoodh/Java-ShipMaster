@@ -36,6 +36,51 @@ public class TankDataForMap {
     private String alarm_date;
     private String time_accepted;
     private String time_retrieved;
+    private float  max_volume;
+    private float tankHighLevel;
+    private float tankLowLevel;
+    private float tankLowLowLevel;
+    private float highHighLevel;
+
+    public float getMax_volume() {
+        return max_volume;
+    }
+
+    public void setMax_volume(float max_volume) {
+        this.max_volume = max_volume;
+    }
+
+    public float getTankHighLevel() {
+        return tankHighLevel;
+    }
+
+    public void setTankHighLevel(float tankHighLevel) {
+        this.tankHighLevel = tankHighLevel;
+    }
+
+    public float getTankLowLevel() {
+        return tankLowLevel;
+    }
+
+    public void setTankLowLevel(float tankLowLevel) {
+        this.tankLowLevel = tankLowLevel;
+    }
+
+    public float getTankLowLowLevel() {
+        return tankLowLowLevel;
+    }
+
+    public void setTankLowLowLevel(float tankLowLowLevel) {
+        this.tankLowLowLevel = tankLowLowLevel;
+    }
+
+    public float getHighHighLevel() {
+        return highHighLevel;
+    }
+
+    public void setHighHighLevel(float highHighLevel) {
+        this.highHighLevel = highHighLevel;
+    }
 
     public float getVolume() {
         return volume;
@@ -346,6 +391,11 @@ public class TankDataForMap {
                 ", alarm_date='" + alarm_date + '\'' +
                 ", time_accepted='" + time_accepted + '\'' +
                 ", time_retrieved='" + time_retrieved + '\'' +
+                ", max_volume=" + max_volume +
+                ", tankHighLevel=" + tankHighLevel +
+                ", tankLowLevel=" + tankLowLevel +
+                ", tankLowLowLevel=" + tankLowLowLevel +
+                ", highHighLevel=" + highHighLevel +
                 '}';
     }
 }

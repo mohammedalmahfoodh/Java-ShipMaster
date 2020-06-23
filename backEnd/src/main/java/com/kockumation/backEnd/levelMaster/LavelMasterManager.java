@@ -16,18 +16,27 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 public class LavelMasterManager {
-    private final String uri="ws://localhost:8089";
-   // private final String uri="ws://192.168.190.232:8089";
+    private final String uri = "ws://localhost:8089";
+    // private final String uri="ws://192.168.190.232:8089";
 
-   AllTanksDataFromKsl allTanksDataFromKsl;
-    public static  HashMap<Integer, TankDataForMap> tankMapData=new HashMap<Integer,TankDataForMap>();
-    public static  boolean kslDataInserted = false;
+    AllTanksDataFromKsl allTanksDataFromKsl;
+    TankSettingsData tankSettingsData;
+    public static HashMap<Integer, TankDataForMap> tankMapData = new HashMap<Integer, TankDataForMap>();
+    public static boolean kslDataInserted = false;
+    public static boolean kslWebSocketClosed = false;
+    public static boolean WebSocketSettingsClosed = false;
+    public static boolean checkIfDataExistsInDB = false;
+
     public LavelMasterManager() {
         allTanksDataFromKsl = new AllTanksDataFromKsl();
+        tankSettingsData = new TankSettingsData();
     }
-    public boolean checkIfInserted(){
+
+    public boolean checkIfInserted() {
 
         return kslDataInserted;
     }
@@ -38,7 +47,7 @@ public class LavelMasterManager {
         System.out.println(now);
 
         boolean ifWebsocketReady = false;
-
+        boolean ifTankSettingsWebsocketReady = false;
 
         ClientManager client = ClientManager.createClient();
         JSONObject getKslTankData = new JSONObject();
@@ -48,17 +57,25 @@ public class LavelMasterManager {
         String getKslTankDataStr = getKslTankData.toString();
 
 
-
-        while (!ifWebsocketReady ) {
+        while (!ifWebsocketReady) {
             try {
-                AllTanksDataFromKsl allTanksDataFromKsl = new AllTanksDataFromKsl();
+
                 client.connectToServer(allTanksDataFromKsl, new URI(uri));
                 allTanksDataFromKsl.sendMessage(getKslTankDataStr);
                 ifWebsocketReady = true;
-           //     kslDataInserted = allTanksDataFromKsl.insertAllKslDataIntoTanks().get();
+                kslWebSocketClosed = allTanksDataFromKsl.onClose().get();
+                System.out.println("now closed inside manager");
+                checkIfDataExistsInDB = allTanksDataFromKsl.checkIfDataExists().get();
+                if (checkIfDataExistsInDB) {
+                    System.out.println("Data exists in db");
+                    allTanksDataFromKsl.updateAllKslDataInTanks();
+                } else {
+                    System.out.println("No Data exists in db");
+                    kslDataInserted = allTanksDataFromKsl.insertAllKslDataIntoTanks(allTanksDataFromKsl.getKslTanksData().getSetKslTankData()).get();
+                    System.out.println("now Inserted into database");
+                }
 
                 allTanksDataFromKsl = null;
-
 
 
             } catch (DeploymentException e) {
@@ -68,36 +85,68 @@ public class LavelMasterManager {
                 //   e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
-            } catch (URISyntaxException e) {
+            } catch (URISyntaxException | InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
 
         }// While
 
-      // Get tanks settings     *******************************************************
-        try {
-            Thread.sleep(2000);
-            System.out.println(tankMapData.size());
-         //   TankSettingsData tankSettingsData = new TankSettingsData();
-          //  client.connectToServer(tankSettingsData, new URI(uri));
-            
+        // Get tanks settings     *******************************************************
+        while (!ifTankSettingsWebsocketReady) {
+            try {
+                client.connectToServer(tankSettingsData, new URI(uri));
+                ifTankSettingsWebsocketReady = true;
+
+                for (Map.Entry<Integer, TankDataForMap> entry : tankMapData.entrySet()) {
+                    JSONObject getTankSetting = new JSONObject();
+                    JSONObject tankId = new JSONObject();
+                    tankId.put("tankId", entry.getKey());
+                    getTankSetting.put("getTankSettingsData", tankId);
+                    String getTankSettingStr = getTankSetting.toString();
+                    tankSettingsData.sendMessage(getTankSettingStr);
 
 
+                    //    System.out.println("Key = " + entry.getKey() +
+                    //           ", Value = " + entry.getValue());
+                }
+
+                try {
+                    WebSocketSettingsClosed = tankSettingsData.onClose().get();
+
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                }
+                if (WebSocketSettingsClosed){
+                    System.out.println("WebSocket Settings Closed Now.");
+                    tankSettingsData.updateAllTanksSettings().get();
+                    //printMapData();
+                }
+
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            } catch (DeploymentException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
 
 
-
-
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
         // Get tanks settings     *******************************************************
 
     } // LevelMaster engine
 
-
-
-
-
+    public void printMapData(){
+        for (Map.Entry<Integer, TankDataForMap> entry : LavelMasterManager.tankMapData.entrySet()) {
+              System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
+        }
+    }
 
 
 }

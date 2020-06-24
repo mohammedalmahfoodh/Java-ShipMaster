@@ -142,7 +142,7 @@ public class LavelMasterManager {
         // Subscribe to tanks live data   ************** Subscribe to tanks live data **********************
         while (true){
             try {
-                Thread.sleep(3000);
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -150,7 +150,7 @@ public class LavelMasterManager {
             try {
 
                if (!IfTankLiveDataSubscription){
-                   Thread.sleep(3000);
+                   Thread.sleep(1000);
                    JSONObject tankSubscription = new JSONObject();
                    JSONObject tankId = new JSONObject();
                    tankId.put("tankId",0);

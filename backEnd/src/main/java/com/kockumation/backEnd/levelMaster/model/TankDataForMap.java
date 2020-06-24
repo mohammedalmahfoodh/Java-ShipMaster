@@ -42,6 +42,30 @@ public class TankDataForMap {
     private float tankLowLowLevel;
     private float highHighLevel;
 
+    public TankDataForMap() {
+        meanTemp =0;
+        temperature_limit = 90;
+        update_Temperature_alarm = true;
+        update_Temperature_blue_alarm = true;
+        update_Temperature_archive = true;
+        temp_inserted = false;
+        temp_acknowledged = false;
+        temp_alarm_active = false;
+        temp_blue_alarm = false;
+        temp_archive = false;
+        archive = false;
+        updateH = true;
+        updateHH = true;
+        updateL = true;
+        updateLL = true;
+        updateBlue = true;
+        inserted = false;
+        acknowledged = false;
+        alarm_active = false;
+        blue_alarm =false;
+
+    }
+
     public float getMax_volume() {
         return max_volume;
     }

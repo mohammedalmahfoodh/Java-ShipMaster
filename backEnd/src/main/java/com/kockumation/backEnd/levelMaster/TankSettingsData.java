@@ -116,6 +116,7 @@ public class TankSettingsData {
                 tankDataForMap.setTankLowLevel(tankSettingData.getLowLevel());
                 tankDataForMap.setTankLowLowLevel(tankSettingData.getLowLowLevel());
 
+
                 if (setTankSettings.getSetTankSettingsData().getTankId() == LavelMasterManager.tankMapData.size()) {
 
                     closeSession();

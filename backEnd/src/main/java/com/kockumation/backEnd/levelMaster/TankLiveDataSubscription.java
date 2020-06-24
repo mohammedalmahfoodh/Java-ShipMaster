@@ -8,7 +8,6 @@ import com.kockumation.backEnd.levelMaster.model.*;
 
 import javax.websocket.*;
 import java.io.IOException;
-import java.util.Timer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -21,13 +20,19 @@ public class TankLiveDataSubscription {
     private ExecutorService executor
             = Executors.newSingleThreadExecutor();
    public static  TankSubscriptionData tankSubscriptionData;
-    Timer timer = new Timer();
+   public DetectAndSaveAlarms detectAndSaveAlarms;
+    public TankLiveDataSubscription() {
+        detectAndSaveAlarms = new DetectAndSaveAlarms();
+    }
 
     @OnOpen
     public void onOpen(Session session) {
         this.session = session;
-        //  System.out.println("Connection opened.");
-        timer.schedule(new DetectAndSaveAlarms(),0,9000);
+        detectAndSaveAlarms = new DetectAndSaveAlarms();
+        //boolean startNewThread
+        detectAndSaveAlarms.start();
+
+      //  timer.schedule(new DetectAndSaveAlarms(),0,2000);
     }
 
     @OnMessage
@@ -41,7 +46,8 @@ public class TankLiveDataSubscription {
 
                 Gson gson = new Gson();
                  tankSubscriptionData = gson.fromJson(message, TankSubscriptionData.class);
-                System.out.println(tankSubscriptionData.getSetTankSubscriptionData());
+
+             //   System.out.println(tankSubscriptionData.getSetTankSubscriptionData());
 
             }
         } catch (JsonProcessingException e) {
@@ -70,7 +76,10 @@ public class TankLiveDataSubscription {
 
         LavelMasterManager.IfTankLiveDataSubscription = false;
         return executor.submit(() -> {
-
+            detectAndSaveAlarms.interrupt();
+            DetectAndSaveAlarms.firstRun =true;
+            DetectAndSaveAlarms.timer.cancel();
+            DetectAndSaveAlarms.timer.purge();
             System.out.println("Live Data WebSocket closed ");
 
             return true;

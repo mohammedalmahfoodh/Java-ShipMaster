@@ -20,13 +20,13 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 public class LavelMasterManager {
-    private final String uri = "ws://localhost:8089";
-    // private final String uri="ws://192.168.190.232:8089";
+    //  private final String uri = "ws://localhost:8089";
+     private final String uri="ws://192.168.190.232:8089";
 
     AllTanksDataFromKsl allTanksDataFromKsl;
     TankSettingsData tankSettingsData;
     TankLiveDataSubscription tankLiveDataSubscription;
-    public static HashMap<Integer, TankDataForMap> tankMapData = new HashMap<Integer, TankDataForMap>();
+    public static Map<Integer, TankDataForMap> tankMapData = new HashMap<Integer, TankDataForMap>();
     public static boolean kslDataInserted = false;
     public static boolean kslWebSocketClosed = false;
     public static boolean WebSocketSettingsClosed = false;

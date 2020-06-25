@@ -1,7 +1,5 @@
 package com.kockumation.backEnd.levelMaster;
 
-import com.kockumation.backEnd.levelMaster.TankLiveDataSubscription;
-import com.kockumation.backEnd.levelMaster.model.KslTankData;
 import com.kockumation.backEnd.levelMaster.model.TankAlarmData;
 import com.kockumation.backEnd.levelMaster.model.TankDataForMap;
 import com.kockumation.backEnd.utilities.MySQLJDBCUtil;
@@ -13,13 +11,9 @@ import java.sql.Statement;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 public class DetectAndSaveAlarms extends Thread {
     public static Timer timer;
@@ -61,6 +55,7 @@ public class DetectAndSaveAlarms extends Thread {
             preparedStmt.setBoolean(10, tankDataForMap.isBlue_alarm());
             preparedStmt.setString(11, tankDataForMap.getTime_retrieved());
             int rowAffected = preparedStmt.executeUpdate();
+            System.out.println(rowAffected);
             String updateTanks = "UPDATE tanks set alarm_name = ? where tank_id = ?;";
             PreparedStatement preparedStmt2 = conn.prepareStatement(updateTanks, Statement.RETURN_GENERATED_KEYS);
             preparedStmt2.setString(1, tankDataForMap.getAlarm_name());
@@ -86,20 +81,21 @@ public class DetectAndSaveAlarms extends Thread {
 
         try (Connection conn = MySQLJDBCUtil.getConnection()) {
             //  String query = "INSERT INTO alarms (alarm_name,tank_id,acknowledged,alarm_description,level_alarm,archive,alarm_date,time_accepted,alarm_active,blue_alarm,time_retrieved) VALUES (?,?,?,?,?,?,?,?,?,?,?);";
-            String updateAlarms = "UPDATE alarms set alarm_description = ?,blue_alarm = ?,time_retrieved =? ,alarm_name =? ,alarm_date =?,alarm_active =?,time_accepted =?,acknowledged=? where tank_id = ? && (temp_alarm = 0) && (archive = 0);";
+            String updateAlarms = "UPDATE alarms set alarm_name= ?,alarm_description = ?,blue_alarm = ?,alarm_date =? ,time_retrieved =?,alarm_active =?,time_accepted =?,acknowledged=?,level_alarm = ? where tank_id = ? && (temp_alarm = 0) && (archive = 0);";
             PreparedStatement preparedStmt = conn.prepareStatement(updateAlarms, Statement.RETURN_GENERATED_KEYS);
 
-            preparedStmt.setString(1, tankDataForMap.getAlarm_description());
-            preparedStmt.setBoolean(2, tankDataForMap.isBlue_alarm());
-            preparedStmt.setString(3, tankDataForMap.getTime_retrieved());
-            preparedStmt.setString(4, tankDataForMap.getAlarm_name());
-            preparedStmt.setString(5, tankDataForMap.getAlarm_date());
+            preparedStmt.setString(1, tankDataForMap.getAlarm_name());
+            preparedStmt.setString(2, tankDataForMap.getAlarm_description());
+            preparedStmt.setBoolean(3, tankDataForMap.isBlue_alarm());
+            preparedStmt.setString(4, tankDataForMap.getAlarm_date());
+            preparedStmt.setString(5, tankDataForMap.getTime_retrieved());
             preparedStmt.setBoolean(6, tankDataForMap.isAlarm_active());
             preparedStmt.setString(7, tankDataForMap.getTime_accepted());
             preparedStmt.setBoolean(8, tankDataForMap.isAcknowledged());
-            preparedStmt.setInt(9, tankDataForMap.getTank_id());
+            preparedStmt.setInt(9, tankDataForMap.getLevel_alarm());
+            preparedStmt.setInt(10, tankDataForMap.getTank_id());
             int rowAffected = preparedStmt.executeUpdate();
-
+            System.out.println(rowAffected);
             String updateTanks = "UPDATE tanks set alarm_name = ? where tank_id = ?;";
             PreparedStatement preparedStmt2 = conn.prepareStatement(updateTanks, Statement.RETURN_GENERATED_KEYS);
             preparedStmt2.setString(1, tankDataForMap.getAlarm_name());
@@ -119,6 +115,71 @@ public class DetectAndSaveAlarms extends Thread {
 
     }// Update level alarm  ****************************** Update level alarm   ***************************************
 
+    // Update Archive alarms  ****************************** Update Archive alarms   ***************************************
+    public Future<Boolean> updateArchivedlAlarm(TankDataForMap tankDataForMap) {
+
+        try (Connection conn = MySQLJDBCUtil.getConnection()) {
+
+            String updateAlarms = "UPDATE alarms set alarm_description= ?,blue_alarm = ?,time_retrieved = ?,alarm_active =? ,time_accepted =?,archive =? where tank_id = ? && (alarm_active = 1 || blue_alarm = 1) && (temp_alarm = 0);";
+            PreparedStatement preparedStmt = conn.prepareStatement(updateAlarms, Statement.RETURN_GENERATED_KEYS);
+
+            preparedStmt.setString(1, tankDataForMap.getAlarm_description());
+            preparedStmt.setBoolean(2, tankDataForMap.isBlue_alarm());
+            preparedStmt.setString(3, tankDataForMap.getTime_retrieved());
+            preparedStmt.setBoolean(4, tankDataForMap.isAlarm_active());
+            preparedStmt.setString(5, tankDataForMap.getTime_accepted());
+            preparedStmt.setBoolean(6, tankDataForMap.isArchive());
+            preparedStmt.setInt(7, tankDataForMap.getTank_id());
+            int rowAffected = preparedStmt.executeUpdate();
+            System.out.println(rowAffected);
+
+            String updateTanks = "UPDATE tanks set alarm_name = null where tank_id = ?;";
+            PreparedStatement preparedStmt2 = conn.prepareStatement(updateTanks, Statement.RETURN_GENERATED_KEYS);
+            preparedStmt2.setInt(1, tankDataForMap.getTank_id());
+            int rowAffected2 = preparedStmt2.executeUpdate();
+
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+            return executor.submit(() -> {
+                return false;
+            });
+        }
+        return executor.submit(() -> {
+            //  Thread.sleep(3000);
+            return true;
+        });
+
+    }// Update Archive alarms  ****************************** Update Archive alarms   ***************************************
+
+    //Update tanks table with tank level, tank_temperature , volume , volume percent and weight.
+    private void updateTanksVolume(TankDataForMap tankDataForMap) {
+        try (Connection conn = MySQLJDBCUtil.getConnection()) {
+            //  System.out.println(tankDataForMap.getAlarm_description());
+            String updateTanksVolumeH = "UPDATE tanks set tank_temperature = ?,tank_level = ?,weight =? ,volume_percent =? ,volume =?,high_alarm_limit =?,low_alarm_limit =?,density=? where tank_id = ? ;";
+            PreparedStatement preparedStmt = conn.prepareStatement(updateTanksVolumeH, Statement.RETURN_GENERATED_KEYS);
+            float max_volume = tankDataForMap.getMax_volume();
+            float tank_temperature = (tankDataForMap.getMeanTemp() != 0.0f) ? tankDataForMap.getMeanTemp() : 0.0f;
+            float density = tankDataForMap.getDensity();
+            float volume = tankDataForMap.getVolume();
+            float volume_percent = (max_volume > 0) ? (volume / max_volume) * 100 : 0;
+            float weight = volume * density;
+
+            preparedStmt.setFloat(1, tankDataForMap.getMeanTemp());
+            preparedStmt.setFloat(2, tankDataForMap.getLevel());
+            preparedStmt.setFloat(3, weight);
+            preparedStmt.setFloat(4, volume_percent);
+            preparedStmt.setFloat(5, volume);
+            preparedStmt.setFloat(6, tankDataForMap.getTankHighLevel());
+            preparedStmt.setFloat(7, tankDataForMap.getTankLowLevel());
+            preparedStmt.setFloat(8, density);
+            preparedStmt.setInt(9, tankDataForMap.getTank_id());
+            int rowAffected = preparedStmt.executeUpdate();
+
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        }
+
+    }//Update tanks table with tank level, tank_temperature , volume , volume percent and weight.
 
     public void detectAlarms() {
 
@@ -126,11 +187,25 @@ public class DetectAndSaveAlarms extends Thread {
             @Override
             public void run() {
                 if (TankLiveDataSubscription.tankSubscriptionData != null) {
+
                     //    System.out.println(TankLiveDataSubscription.tankSubscriptionData.getSetTankSubscriptionData());
                     for (TankAlarmData tankAlarmData : TankLiveDataSubscription.tankSubscriptionData.getSetTankSubscriptionData()) {
                         TankDataForMap tankDataForMap = LavelMasterManager.tankMapData.get(tankAlarmData.getTankId());
-                        if (tankAlarmData.getLevel() > 0) {
+                        tankDataForMap.setMeanTemp(tankAlarmData.getMeanTemp());
+                        tankDataForMap.setLevel(tankAlarmData.getLevel());
+                        tankDataForMap.setVolume(tankAlarmData.getVolume());
 
+
+                        CompletableFuture.runAsync(() -> {
+                            updateTanksVolume(tankDataForMap);
+                        });
+                        if (tankAlarmData.getLevelAlarm() > 0) {
+                            if (tankDataForMap.getAlarm_date() == null) {
+                                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                                String alarmDateTriggered = LocalDateTime.now(Clock.systemUTC()).format(formatter);
+                                tankDataForMap.setAlarm_date(alarmDateTriggered);
+                            }
+                            System.out.println("Tank Code: " + tankDataForMap.getCode_name() + " Is Inserted " + tankDataForMap.isInserted() + " Is Blue: " + tankDataForMap.isBlue_alarm() + " Is Active " + tankDataForMap.isAlarm_active() + " Level_alarm: " + tankDataForMap.getLevel_alarm() + " Description " + tankDataForMap.getAlarm_description() + " Alarm Date " + tankDataForMap.getAlarm_date() + " Time_retrieved " + tankDataForMap.getTime_retrieved());
                             // Check if tank level will reach beyond limits (High ,high high , low and low low) ********************************
                             if (tankDataForMap.getTankLowLowLevel() != -10 && tankDataForMap.getTankLowLevel() != -10) {
                                 if ((tankAlarmData.getLevel() > tankDataForMap.getTankLowLevel())) {
@@ -162,7 +237,7 @@ public class DetectAndSaveAlarms extends Thread {
                                         tankDataForMap.setUpdateBlue(true);
                                         tankDataForMap.setBlue_alarm(false);
                                         tankDataForMap.setLevel_alarm(tankAlarmData.getLevelAlarm());
-
+                                        LavelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
                                         try {
                                             if (tankDataForMap.isInserted()) {
 
@@ -214,7 +289,7 @@ public class DetectAndSaveAlarms extends Thread {
                                         tankDataForMap.setUpdateBlue(true);
                                         tankDataForMap.setBlue_alarm(false);
                                         tankDataForMap.setLevel_alarm(tankAlarmData.getLevelAlarm());
-
+                                        LavelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
                                         try {
                                             if (tankDataForMap.isInserted()) {
 
@@ -267,7 +342,8 @@ public class DetectAndSaveAlarms extends Thread {
                                         tankDataForMap.setUpdateBlue(true);
                                         tankDataForMap.setBlue_alarm(false);
                                         tankDataForMap.setLevel_alarm(tankAlarmData.getLevelAlarm());
-                                        System.out.println(LavelMasterManager.tankMapData.get(tankAlarmData.getTankId()));
+                                        LavelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
+                                        //   System.out.println(LavelMasterManager.tankMapData.get(tankAlarmData.getTankId()));
                                         try {
                                             if (tankDataForMap.isInserted()) {
 
@@ -321,13 +397,13 @@ public class DetectAndSaveAlarms extends Thread {
                                         tankDataForMap.setUpdateBlue(true);
                                         tankDataForMap.setBlue_alarm(false);
                                         tankDataForMap.setLevel_alarm(tankAlarmData.getLevelAlarm());
-
+                                        LavelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
                                         try {
                                             if (tankDataForMap.isInserted()) {
 
                                                 boolean updatedOrNot = updateLevelAlarm(tankDataForMap).get();
                                                 if (updatedOrNot) {
-                                                    tankDataForMap.setInserted(true);
+                                                    //  tankDataForMap.setInserted(true);
                                                     System.out.println("Low level Alarm for tank " + tankDataForMap.getCode_name() + " updated");
                                                 } else {
                                                     System.out.println("Error connecting database connect to db to update alarms");
@@ -374,7 +450,7 @@ public class DetectAndSaveAlarms extends Thread {
                                     tankDataForMap.setUpdateBlue(true);
                                     tankDataForMap.setBlue_alarm(false);
                                     tankDataForMap.setLevel_alarm(tankAlarmData.getLevelAlarm());
-
+                                    LavelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
                                     try {
                                         if (tankDataForMap.isInserted()) {
 
@@ -425,7 +501,7 @@ public class DetectAndSaveAlarms extends Thread {
                                     tankDataForMap.setUpdateBlue(true);
                                     tankDataForMap.setBlue_alarm(false);
                                     tankDataForMap.setLevel_alarm(tankAlarmData.getLevelAlarm());
-
+                                    LavelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
                                     try {
                                         if (tankDataForMap.isInserted()) {
 
@@ -461,6 +537,41 @@ public class DetectAndSaveAlarms extends Thread {
 
                             //***** Check if alarm comes from alarm state to normal state without being accepted...***********
                             if ((tankAlarmData.getLevel() > tankDataForMap.getTankLowLevel() && tankAlarmData.getLevel() < tankDataForMap.getTankHighLevel()) && (tankDataForMap.isAcknowledged() == false)) {
+                                if (tankDataForMap.getAlarm_name() == null) {
+                                    switch (tankAlarmData.getLevelAlarm()) {
+
+                                        case 17:
+                                        case 16:
+                                        case 25:
+                                        case 24:
+                                        case 27:
+                                        case 29:
+                                        case 31:
+                                            tankDataForMap.setAlarm_name(tankDataForMap.getCode_name() + " LevelAlarm" + " HH");
+                                            break;
+                                        case 15:
+                                        case 13:
+                                        case 11:
+                                        case 9:
+                                        case 8:
+                                            tankDataForMap.setAlarm_name(tankDataForMap.getCode_name() + " LevelAlarm" + " H");
+                                            break;
+                                        case 7:
+                                        case 6:
+                                        case 3:
+                                        case 2:
+                                            tankDataForMap.setAlarm_name(tankDataForMap.getCode_name() + " LevelAlarm" + " LL");
+                                            break;
+                                        case 5:
+                                        case 4:
+                                            tankDataForMap.setAlarm_name(tankDataForMap.getCode_name() + " LevelAlarm" + " L");
+                                            break;
+
+                                        default:
+                                            tankDataForMap.setAlarm_name(tankDataForMap.getCode_name() + " LevelAlarm" + " HL");
+                                            break;
+                                    }
+                                }
                                 if (tankDataForMap.getTankLowLevel() != -10 && tankDataForMap.getTankLowLowLevel() != -10) {
                                     if (tankDataForMap.getTankLowLevel() != 0) {
                                         if (tankDataForMap.isUpdateBlue() == true) {
@@ -471,17 +582,19 @@ public class DetectAndSaveAlarms extends Thread {
                                             tankDataForMap.setUpdateBlue(false);
                                             tankDataForMap.setBlue_alarm(true);
                                             tankDataForMap.setAlarm_active(false);
+                                            tankDataForMap.setLevel_alarm(tankAlarmData.getLevelAlarm());
                                             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
                                             String alarmDateTriggered = LocalDateTime.now(Clock.systemUTC()).format(formatter);
                                             tankDataForMap.setTime_retrieved(alarmDateTriggered);
                                             tankDataForMap.setAlarm_description("Inactive unaccepted");
+                                           // LavelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
                                             try {
                                                 if (tankDataForMap.isInserted()) {
 
                                                     boolean updatedOrNot = updateLevelAlarm(tankDataForMap).get();
                                                     if (updatedOrNot) {
                                                         tankDataForMap.setInserted(true);
-                                                        System.out.println("High high level Alarm for tank " + tankDataForMap.getCode_name() + " updated");
+                                                        System.out.println("Blue level Alarm for tank " + tankDataForMap.getCode_name() + " updated");
                                                     } else {
                                                         System.out.println("Error connecting database connect to db to update alarms");
                                                     }
@@ -517,11 +630,12 @@ public class DetectAndSaveAlarms extends Thread {
                                         tankDataForMap.setUpdateBlue(false);
                                         tankDataForMap.setBlue_alarm(true);
                                         tankDataForMap.setAlarm_active(false);
+                                        tankDataForMap.setLevel_alarm(tankAlarmData.getLevelAlarm());
                                         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
                                         String alarmDateTriggered = LocalDateTime.now(Clock.systemUTC()).format(formatter);
                                         tankDataForMap.setTime_retrieved(alarmDateTriggered);
                                         tankDataForMap.setAlarm_description("Inactive unaccepted");
-
+                                        LavelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
                                         try {
                                             if (tankDataForMap.isInserted()) {
 
@@ -562,11 +676,12 @@ public class DetectAndSaveAlarms extends Thread {
                                         tankDataForMap.setUpdateBlue(false);
                                         tankDataForMap.setBlue_alarm(true);
                                         tankDataForMap.setAlarm_active(false);
+                                        tankDataForMap.setLevel_alarm(tankAlarmData.getLevelAlarm());
                                         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
                                         String alarmDateTriggered = LocalDateTime.now(Clock.systemUTC()).format(formatter);
                                         tankDataForMap.setTime_retrieved(alarmDateTriggered);
                                         tankDataForMap.setAlarm_description("Inactive unaccepted");
-
+                                        LavelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
                                         try {
                                             if (tankDataForMap.isInserted()) {
 
@@ -599,14 +714,109 @@ public class DetectAndSaveAlarms extends Thread {
 
                             }//***** Check if alarm comes from alarm state to normal state without being accepted...***********
 
+                            // Check if alarm accepted or not ******************* Check if alarm accepted or not ************************
+                            if (tankAlarmData.getLevelAlarm() % 2 == 1) {
+                                tankDataForMap.setAcknowledged(false);
+                                //  LavelMasterManager.tankMapData.put(tankDataForMap.getTank_id(),tankDataForMap);
+                            } else {
+                                if (!tankDataForMap.isAcknowledged()) {
+                                    tankDataForMap.setAcknowledged(true);
+                                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                                    String time_accepted = LocalDateTime.now(Clock.systemUTC()).format(formatter);
+                                    tankDataForMap.setTime_accepted(time_accepted);
+                                    tankDataForMap.setAlarm_description("Active accepted");
+                                    tankDataForMap.setLevel_alarm(tankAlarmData.getLevelAlarm());
+                                    LavelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
+                                    try {
+                                        if (tankDataForMap.isInserted()) {
+
+                                            boolean updatedOrNot = updateLevelAlarm(tankDataForMap).get();
+                                            if (updatedOrNot) {
+                                                tankDataForMap.setInserted(true);
+                                                System.out.println("Active accepted level Alarm for tank " + tankDataForMap.getCode_name() + " updated");
+                                            } else {
+                                                System.out.println("Error connecting database connect to db to update alarms");
+                                            }
+                                        } else {
+                                            boolean insertedOrNot = insertNewLevelAlarm(tankDataForMap).get();
+                                            if (insertedOrNot) {
+                                                tankDataForMap.setInserted(true);
+                                                System.out.println("Active accepted level Alarm for tank " + tankDataForMap.getCode_name() + " inserted");
+                                            } else {
+                                                System.out.println("Error connecting database connect to db to update alarms");
+                                            }
+                                        }
+
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                        //  System.out.println(LavelMasterManager.tankMapData.get(tankAlarmData.getTankId()));
+                                    } catch (ExecutionException e) {
+                                        e.printStackTrace();
+                                    }
+
+                                }
+                            } // Check if alarm accepted or not ******************* Check if alarm accepted or not ************************
 
 
-                        }// tankAlarmData.getLevel() > 0 ************************ If Level Alarm > 0  *****************
+                        } else {// tankAlarmData.getLevel() > 0 ************************ If Level Alarm > 0  *****************
+
+                            if (tankDataForMap.isAcknowledged()) {
+                                if (tankDataForMap.getTime_retrieved() == null) {
+                                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                                    String time_retrieved = LocalDateTime.now(Clock.systemUTC()).format(formatter);
+                                    tankDataForMap.setTime_retrieved(time_retrieved);
+                                }
+                                if (tankDataForMap.getTime_accepted() == null) {
+                                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                                    String time_accepted = LocalDateTime.now(Clock.systemUTC()).format(formatter);
+                                    tankDataForMap.setTime_accepted(time_accepted);
+                                }
+                                tankDataForMap.setAlarm_description("Archived Alarm");
+                                tankDataForMap.setAlarm_active(false);
+                                tankDataForMap.setArchive(true);
+                                tankDataForMap.setBlue_alarm(false);
+                                try {
+
+                                    boolean updatedOrNot = updateArchivedlAlarm(tankDataForMap).get();
+                                    if (updatedOrNot) {
+                                        tankDataForMap.setArchive(false);
+                                        tankDataForMap.setUpdateH(true);
+                                        tankDataForMap.setUpdateHH(true);
+                                        tankDataForMap.setUpdateL(true);
+                                        tankDataForMap.setUpdateLL(true);
+                                        tankDataForMap.setUpdateBlue(true);
+                                        tankDataForMap.setInserted(false);
+                                        tankDataForMap.setAcknowledged(false);
+                                        tankDataForMap.setLevel_alarm(0);
+                                        tankDataForMap.setAlarm_name(null);
+                                        tankDataForMap.setAlarm_description(null);
+                                        tankDataForMap.setBlue_alarm(false);
+                                        tankDataForMap.setAlarm_date(null);
+                                        tankDataForMap.setTime_accepted(null);
+                                        tankDataForMap.setTime_retrieved(null);
+
+
+                                        System.out.println("Archive Alarm for tank " + tankDataForMap.getCode_name() + " updated");
+                                    } else {
+                                        System.out.println("Error connecting database connect to db to update alarms");
+                                    }
+
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                    //  System.out.println(LavelMasterManager.tankMapData.get(tankAlarmData.getTankId()));
+                                } catch (ExecutionException e) {
+                                    e.printStackTrace();
+                                }
+
+                            } // if (tankDataForMap.isAcknowledged() )
+
+
+                        }//tankAlarmData.getLevel() == 0 ************************ If Level Alarm == 0  ***************** No Alarm in this case
 
                     }// Iteration of tanks live data subscription list coming from ksl  ***************************************************
 
 
-                }
+                }//if (TankLiveDataSubscription.tankSubscriptionData != null)
 
 
             }

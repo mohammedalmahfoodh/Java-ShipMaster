@@ -5,6 +5,7 @@ public class TankDataForMap {
     private float volume;
     private int tank_id;
     private float meanTemp;
+    private float level;
     private int temperature_limit;
     private boolean update_Temperature_alarm;
     private boolean update_Temperature_blue_alarm;
@@ -36,14 +37,14 @@ public class TankDataForMap {
     private String alarm_date;
     private String time_accepted;
     private String time_retrieved;
-    private float  max_volume;
+    private float max_volume;
     private float tankHighLevel;
     private float tankLowLevel;
     private float tankLowLowLevel;
     private float highHighLevel;
 
     public TankDataForMap() {
-        meanTemp =0;
+        meanTemp = 0.0f;
         temperature_limit = 90;
         update_Temperature_alarm = true;
         update_Temperature_blue_alarm = true;
@@ -62,7 +63,7 @@ public class TankDataForMap {
         inserted = false;
         acknowledged = false;
         alarm_active = false;
-        blue_alarm =false;
+        blue_alarm = false;
 
     }
 
@@ -120,6 +121,14 @@ public class TankDataForMap {
 
     public void setTank_id(int tank_id) {
         this.tank_id = tank_id;
+    }
+
+    public float getLevel() {
+        return level;
+    }
+
+    public void setLevel(float level) {
+        this.level = level;
     }
 
     public float getMeanTemp() {

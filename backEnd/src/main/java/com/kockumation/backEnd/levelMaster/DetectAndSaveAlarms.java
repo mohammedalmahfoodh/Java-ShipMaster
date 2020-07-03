@@ -181,6 +181,71 @@ public class DetectAndSaveAlarms extends Thread {
 
     }//Update tanks table with tank level, tank_temperature , volume , volume percent and weight.
 
+    public void manageTemperatureAlarms(TankDataForMap tankDataForMap) {
+        // Check for temperature alarm ************************************** Check for temperature alarm ****************************
+        if (tankDataForMap.getMeanTemp() > tankDataForMap.getTemperature_limit()) {
+            if (tankDataForMap.isUpdate_Temperature_alarm()) {
+                tankDataForMap.setUpdate_Temperature_alarm(false);
+                String temp_alarm_name = tankDataForMap.getCode_name() + " High Temp Alarm";
+                tankDataForMap.setTemp_alarm_active(true);
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                String temperatureAlarmDate = LocalDateTime.now(Clock.systemUTC()).format(formatter);
+                tankDataForMap.setTemp_alarm_date(temperatureAlarmDate);
+                tankDataForMap.setTemp_time_retrieved(null);
+                tankDataForMap.setTemp_alarm_name(temp_alarm_name);
+                tankDataForMap.setTime_accepted(null);
+                tankDataForMap.setTemp_blue_alarm(false);
+                tankDataForMap.setTemp_alarm_active(true);
+                tankDataForMap.setTemp_acknowledged(false);
+                tankDataForMap.setUpdate_Temperature_blue_alarm(true);
+                tankDataForMap.setTemp_alarm_description("Active unaccepted High Temp Alarm triggered");
+
+
+            }//if (tankDataForMap.isUpdate_Temperature_alarm())
+        }// if (tankDataForMap.getMeanTemp() > tankDataForMap.getTemperature_limit())
+
+      /*  if (tankInfo.meanTemp > mapObject['temperature_limit']) {
+
+            if (mapObject ['update_Temperature_alarm'] === true) {
+
+
+
+                if (mapObject['temp_inserted'] === true) {
+         const sqlUpdate = `UPDATE alarms SET alarm_name = '${temp_alarm_name}', alarm_description = '${mapObject.temp_alarm_description}' ,blue_alarm = 0, time_retrieved =null,alarm_name ='${mapObject.temp_alarm_name}',alarm_date ='${mapObject.temp_alarm_date}',alarm_active =1,time_accepted=null,acknowledged=0
+                    WHERE (tank_id='${tankId}' &&  (archive = 0) && (temp_alarm = 1));`;
+
+                    mySqlConnection.query(sqlUpdate, function (err, result) {
+                        if (err) throw err;
+                        console.log('Alarm became ' + temp_alarm_name);
+
+           const sqlUpdateAlarmName = `UPDATE tanks SET temp_alarm_name ='${temp_alarm_name}' WHERE (tank_id='${tankId}' );`;
+                        mySqlConnection.query(sqlUpdateAlarmName, function (err, result) {
+                            if (err) throw err;
+                        });
+                    });
+                }else{
+      const sql = `INSERT INTO alarms (alarm_name,tank_id,acknowledged,alarm_description,archive,alarm_date,alarm_active,blue_alarm,temp_alarm) VALUES
+                            ('${temp_alarm_name}','${tankId}',0,'${mapObject['temp_alarm_description']}',0,'${alarmDateTriggered}',1,0,1);`;
+                    mySqlConnection.query(sql, function (err, result) {
+                        if (err) throw err;
+                        mapObject['temp_inserted'] = true;
+        const sqlUpdateAlarmName = `UPDATE tanks SET temp_alarm_name ='${temp_alarm_name}' WHERE (tank_id='${tankId}' );`;
+                        mySqlConnection.query(sqlUpdateAlarmName, function (err, result) {
+                            if (err) throw err;
+                        });
+                    });
+                    // tankMapData.set(tankId, mapObject);
+                    console.log(mapObject)
+                }
+
+            } // (mapObject ['update_Temperature_alarm'] === true)
+
+
+        } // if (tankInfo.meanTemp > mapObject['temperature_limit'])    */
+        // Check for temperature alarm ******************************************* Check for temperature alarm *******************************
+
+    }
+
     public void detectAlarms() {
 
         timer.schedule(new TimerTask() {
@@ -195,6 +260,9 @@ public class DetectAndSaveAlarms extends Thread {
                         tankDataForMap.setLevel(tankAlarmData.getLevel());
                         tankDataForMap.setVolume(tankAlarmData.getVolume());
 
+                        CompletableFuture.runAsync(() -> {
+                            manageTemperatureAlarms(tankDataForMap);
+                        });
 
                         CompletableFuture.runAsync(() -> {
                             updateTanksVolume(tankDataForMap);
@@ -587,7 +655,7 @@ public class DetectAndSaveAlarms extends Thread {
                                             String alarmDateTriggered = LocalDateTime.now(Clock.systemUTC()).format(formatter);
                                             tankDataForMap.setTime_retrieved(alarmDateTriggered);
                                             tankDataForMap.setAlarm_description("Inactive unaccepted");
-                                           // LavelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
+                                            // LavelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
                                             try {
                                                 if (tankDataForMap.isInserted()) {
 

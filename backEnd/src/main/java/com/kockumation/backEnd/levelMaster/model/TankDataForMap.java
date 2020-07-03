@@ -17,8 +17,9 @@ public class TankDataForMap {
     private boolean temp_archive;
     private String temp_alarm_name;
     private String temp_alarm_description;
-    private String tepm_alarm_date;
-    private String tepm_time_accepted;
+    private String temp_alarm_date;
+    private String temp_time_accepted;
+    private String temp_time_retrieved;
     private float density;
     private String code_name;
     private boolean archive;
@@ -51,6 +52,7 @@ public class TankDataForMap {
         update_Temperature_archive = true;
         temp_inserted = false;
         temp_acknowledged = false;
+
         temp_alarm_active = false;
         temp_blue_alarm = false;
         temp_archive = false;
@@ -65,6 +67,14 @@ public class TankDataForMap {
         alarm_active = false;
         blue_alarm = false;
 
+    }
+
+    public String getTemp_time_retrieved() {
+        return temp_time_retrieved;
+    }
+
+    public void setTemp_time_retrieved(String temp_time_retrieved) {
+        this.temp_time_retrieved = temp_time_retrieved;
     }
 
     public float getMax_volume() {
@@ -227,20 +237,20 @@ public class TankDataForMap {
         this.temp_alarm_description = temp_alarm_description;
     }
 
-    public String getTepm_alarm_date() {
-        return tepm_alarm_date;
+    public String getTemp_alarm_date() {
+        return temp_alarm_date;
     }
 
-    public void setTepm_alarm_date(String tepm_alarm_date) {
-        this.tepm_alarm_date = tepm_alarm_date;
+    public void setTemp_alarm_date(String temp_alarm_date) {
+        this.temp_alarm_date = temp_alarm_date;
     }
 
-    public String getTepm_time_accepted() {
-        return tepm_time_accepted;
+    public String getTemp_time_accepted() {
+        return temp_time_accepted;
     }
 
-    public void setTepm_time_accepted(String tepm_time_accepted) {
-        this.tepm_time_accepted = tepm_time_accepted;
+    public void setTemp_time_accepted(String temp_time_accepted) {
+        this.temp_time_accepted = temp_time_accepted;
     }
 
     public float getDensity() {
@@ -404,8 +414,8 @@ public class TankDataForMap {
                 ", temp_archive=" + temp_archive +
                 ", temp_alarm_name='" + temp_alarm_name + '\'' +
                 ", temp_alarm_description='" + temp_alarm_description + '\'' +
-                ", tepm_alarm_date='" + tepm_alarm_date + '\'' +
-                ", tepm_time_accepted='" + tepm_time_accepted + '\'' +
+                ", tepm_alarm_date='" + temp_alarm_date + '\'' +
+                ", tepm_time_accepted='" + temp_time_accepted + '\'' +
                 ", density=" + density +
                 ", code_name='" + code_name + '\'' +
                 ", archive=" + archive +

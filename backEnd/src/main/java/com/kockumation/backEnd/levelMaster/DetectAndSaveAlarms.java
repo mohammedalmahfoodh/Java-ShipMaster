@@ -116,7 +116,7 @@ public class DetectAndSaveAlarms extends Thread {
     }// Update level alarm  ****************************** Update level alarm   ***************************************
 
     // Update Archive alarms  ****************************** Update Archive alarms   ***************************************
-    public Future<Boolean> updateArchivedlAlarm(TankDataForMap tankDataForMap) {
+    public Future<Boolean> updateArchivedAlarm(TankDataForMap tankDataForMap) {
 
         try (Connection conn = MySQLJDBCUtil.getConnection()) {
 
@@ -181,8 +181,52 @@ public class DetectAndSaveAlarms extends Thread {
 
     }//Update tanks table with tank level, tank_temperature , volume , volume percent and weight.
 
+    // Insert new temp alarm  ****************************** Insert new temp alarm into alarms table   ***************************************
+    public Future<Boolean> insertNewTempAlarm(TankDataForMap tankDataForMap) {
+
+        try (Connection conn = MySQLJDBCUtil.getConnection()) {
+            String query = "INSERT INTO alarms (alarm_name,tank_id,acknowledged,alarm_description,archive,alarm_date,alarm_active,blue_alarm,temp_alarm) VALUES (?,?,?,?,?,?,?,?,?,?,?);";
+
+            PreparedStatement preparedStmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+
+            preparedStmt.setString(1, tankDataForMap.getAlarm_name());
+            preparedStmt.setInt(2, tankDataForMap.getTank_id());
+            preparedStmt.setBoolean(3, tankDataForMap.isAcknowledged());
+            preparedStmt.setString(4, tankDataForMap.getAlarm_description());
+            preparedStmt.setBoolean(5, tankDataForMap.isArchive());
+
+            preparedStmt.setString(6, tankDataForMap.getAlarm_date());
+            preparedStmt.setBoolean(7, tankDataForMap.isAlarm_active());
+            preparedStmt.setBoolean(8, tankDataForMap.isBlue_alarm());
+            preparedStmt.setBoolean(9, true);
+
+
+            int rowAffected = preparedStmt.executeUpdate();
+            System.out.println(rowAffected);
+            String updateTanks = "UPDATE tanks set alarm_name = ? where tank_id = ?;";
+            PreparedStatement preparedStmt2 = conn.prepareStatement(updateTanks, Statement.RETURN_GENERATED_KEYS);
+            preparedStmt2.setString(1, tankDataForMap.getAlarm_name());
+            preparedStmt2.setInt(2, tankDataForMap.getTank_id());
+            int rowAffected2 = preparedStmt2.executeUpdate();
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+            return executor.submit(() -> {
+                return false;
+            });
+        }
+        return executor.submit(() -> {
+
+
+            //  Thread.sleep(3000);
+            return true;
+        });
+
+    }// Insert new temp alarm  ****************************** Insert new temp alarm into alarms table   ***************************************
+
+
+    // Check for temperature alarm ************************************** Check for temperature alarm ****************************
     public void manageTemperatureAlarms(TankDataForMap tankDataForMap) {
-        // Check for temperature alarm ************************************** Check for temperature alarm ****************************
+
         if (tankDataForMap.getMeanTemp() > tankDataForMap.getTemperature_limit()) {
             if (tankDataForMap.isUpdate_Temperature_alarm()) {
                 tankDataForMap.setUpdate_Temperature_alarm(false);
@@ -199,7 +243,11 @@ public class DetectAndSaveAlarms extends Thread {
                 tankDataForMap.setTemp_acknowledged(false);
                 tankDataForMap.setUpdate_Temperature_blue_alarm(true);
                 tankDataForMap.setTemp_alarm_description("Active unaccepted High Temp Alarm triggered");
+                   if (tankDataForMap.isTemp_inserted()){
 
+                   }else {
+
+                   }
 
             }//if (tankDataForMap.isUpdate_Temperature_alarm())
         }// if (tankDataForMap.getMeanTemp() > tankDataForMap.getTemperature_limit())
@@ -845,7 +893,7 @@ public class DetectAndSaveAlarms extends Thread {
                                 tankDataForMap.setBlue_alarm(false);
                                 try {
 
-                                    boolean updatedOrNot = updateArchivedlAlarm(tankDataForMap).get();
+                                    boolean updatedOrNot = updateArchivedAlarm(tankDataForMap).get();
                                     if (updatedOrNot) {
                                         tankDataForMap.setArchive(false);
                                         tankDataForMap.setUpdateH(true);

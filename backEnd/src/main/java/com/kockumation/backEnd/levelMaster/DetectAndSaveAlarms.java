@@ -189,16 +189,54 @@ public class DetectAndSaveAlarms extends Thread {
 
             PreparedStatement preparedStmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
 
-            preparedStmt.setString(1, tankDataForMap.getAlarm_name());
+            preparedStmt.setString(1, tankDataForMap.getTemp_alarm_name());
             preparedStmt.setInt(2, tankDataForMap.getTank_id());
-            preparedStmt.setBoolean(3, tankDataForMap.isAcknowledged());
-            preparedStmt.setString(4, tankDataForMap.getAlarm_description());
-            preparedStmt.setBoolean(5, tankDataForMap.isArchive());
+            preparedStmt.setBoolean(3, tankDataForMap.isTemp_acknowledged());
+            preparedStmt.setString(4, tankDataForMap.getTemp_alarm_description());
+            preparedStmt.setBoolean(5, false);
 
-            preparedStmt.setString(6, tankDataForMap.getAlarm_date());
+            preparedStmt.setString(6, tankDataForMap.getTemp_alarm_date());
             preparedStmt.setBoolean(7, tankDataForMap.isAlarm_active());
             preparedStmt.setBoolean(8, tankDataForMap.isBlue_alarm());
             preparedStmt.setBoolean(9, true);
+
+            int rowAffected = preparedStmt.executeUpdate();
+            System.out.println(rowAffected);
+            String updateTanks = "UPDATE tanks set alarm_name = ? where tank_id = ?;";
+            PreparedStatement preparedStmt2 = conn.prepareStatement(updateTanks, Statement.RETURN_GENERATED_KEYS);
+            preparedStmt2.setString(1, tankDataForMap.getTemp_alarm_name());
+            preparedStmt2.setInt(2, tankDataForMap.getTank_id());
+            int rowAffected2 = preparedStmt2.executeUpdate();
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+            return executor.submit(() -> {
+                return false;
+            });
+        }
+        return executor.submit(() -> {
+
+            return true;
+        });
+
+    }// Insert new temp alarm  ****************************** Insert new temp alarm into alarms table   ***************************************
+
+    // Update temp alarm  ****************************** Update temp alarm   ***************************************
+    public Future<Boolean> updateTempAlarm(TankDataForMap tankDataForMap) {
+
+        try (Connection conn = MySQLJDBCUtil.getConnection()) {
+            String query = "UPDATE alarms set alarm_description= ?,blue_alarm = ?,alarm_name = ?,alarm_date = ?,time_retrieved = ?,alarm_active = ?,time_accepted = ?,archive =? where tank_id = ? && (alarm_active = 1 || blue_alarm = 1) && (temp_alarm = 1);";
+
+            PreparedStatement preparedStmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+
+            preparedStmt.setString(1, tankDataForMap.getAlarm_description());
+            preparedStmt.setBoolean(2, tankDataForMap.isBlue_alarm());
+            preparedStmt.setString(3, tankDataForMap.getAlarm_name());
+            preparedStmt.setString(4, tankDataForMap.getTemp_alarm_date());
+            preparedStmt.setString(5, tankDataForMap.getTemp_time_retrieved());
+            preparedStmt.setBoolean(6, tankDataForMap.isTemp_alarm_active());
+            preparedStmt.setString(7, tankDataForMap.getTemp_time_accepted());
+            preparedStmt.setBoolean(8, tankDataForMap.isTemp_archive());
+            preparedStmt.setInt(9, tankDataForMap.getTank_id());
 
 
             int rowAffected = preparedStmt.executeUpdate();
@@ -216,13 +254,10 @@ public class DetectAndSaveAlarms extends Thread {
         }
         return executor.submit(() -> {
 
-
-            //  Thread.sleep(3000);
             return true;
         });
 
-    }// Insert new temp alarm  ****************************** Insert new temp alarm into alarms table   ***************************************
-
+    } // Update temp alarm  ****************************** Update temp alarm   ***************************************
 
     // Check for temperature alarm ************************************** Check for temperature alarm ****************************
     public void manageTemperatureAlarms(TankDataForMap tankDataForMap) {
@@ -252,44 +287,6 @@ public class DetectAndSaveAlarms extends Thread {
             }//if (tankDataForMap.isUpdate_Temperature_alarm())
         }// if (tankDataForMap.getMeanTemp() > tankDataForMap.getTemperature_limit())
 
-      /*  if (tankInfo.meanTemp > mapObject['temperature_limit']) {
-
-            if (mapObject ['update_Temperature_alarm'] === true) {
-
-
-
-                if (mapObject['temp_inserted'] === true) {
-         const sqlUpdate = `UPDATE alarms SET alarm_name = '${temp_alarm_name}', alarm_description = '${mapObject.temp_alarm_description}' ,blue_alarm = 0, time_retrieved =null,alarm_name ='${mapObject.temp_alarm_name}',alarm_date ='${mapObject.temp_alarm_date}',alarm_active =1,time_accepted=null,acknowledged=0
-                    WHERE (tank_id='${tankId}' &&  (archive = 0) && (temp_alarm = 1));`;
-
-                    mySqlConnection.query(sqlUpdate, function (err, result) {
-                        if (err) throw err;
-                        console.log('Alarm became ' + temp_alarm_name);
-
-           const sqlUpdateAlarmName = `UPDATE tanks SET temp_alarm_name ='${temp_alarm_name}' WHERE (tank_id='${tankId}' );`;
-                        mySqlConnection.query(sqlUpdateAlarmName, function (err, result) {
-                            if (err) throw err;
-                        });
-                    });
-                }else{
-      const sql = `INSERT INTO alarms (alarm_name,tank_id,acknowledged,alarm_description,archive,alarm_date,alarm_active,blue_alarm,temp_alarm) VALUES
-                            ('${temp_alarm_name}','${tankId}',0,'${mapObject['temp_alarm_description']}',0,'${alarmDateTriggered}',1,0,1);`;
-                    mySqlConnection.query(sql, function (err, result) {
-                        if (err) throw err;
-                        mapObject['temp_inserted'] = true;
-        const sqlUpdateAlarmName = `UPDATE tanks SET temp_alarm_name ='${temp_alarm_name}' WHERE (tank_id='${tankId}' );`;
-                        mySqlConnection.query(sqlUpdateAlarmName, function (err, result) {
-                            if (err) throw err;
-                        });
-                    });
-                    // tankMapData.set(tankId, mapObject);
-                    console.log(mapObject)
-                }
-
-            } // (mapObject ['update_Temperature_alarm'] === true)
-
-
-        } // if (tankInfo.meanTemp > mapObject['temperature_limit'])    */
         // Check for temperature alarm ******************************************* Check for temperature alarm *******************************
 
     }

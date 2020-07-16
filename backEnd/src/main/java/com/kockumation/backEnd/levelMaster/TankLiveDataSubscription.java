@@ -14,8 +14,7 @@ import java.util.concurrent.Future;
 
 @ClientEndpoint
 public class TankLiveDataSubscription {
-    //  private final String uri="ws://192.168.190.232:8089";
-    private final String uri = "ws://localhost:8089";
+
     private Session session;
     private ExecutorService executor
             = Executors.newSingleThreadExecutor();

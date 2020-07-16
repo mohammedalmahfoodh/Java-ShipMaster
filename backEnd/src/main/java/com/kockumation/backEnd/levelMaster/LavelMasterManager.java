@@ -65,16 +65,22 @@ public class LavelMasterManager {
                 client.connectToServer(allTanksDataFromKsl, new URI(uri));
                 allTanksDataFromKsl.sendMessage(getKslTankDataStr);
                 ifWebsocketReady = true;
-                kslWebSocketClosed = allTanksDataFromKsl.onClose().get();
-                System.out.println("now closed inside manager");
+              //  kslWebSocketClosed = allTanksDataFromKsl.onClose().get();
+              //  System.out.println("now closed inside manager");
                 checkIfDataExistsInDB = allTanksDataFromKsl.checkIfDataExists().get();
                 if (checkIfDataExistsInDB) {
                     System.out.println("Data exists in db");
                     allTanksDataFromKsl.updateAllKslDataInTanks();
+                    kslDataInserted = true;
                 } else {
                     System.out.println("No Data exists in db");
                     kslDataInserted = allTanksDataFromKsl.insertAllKslDataIntoTanks(allTanksDataFromKsl.getKslTanksData().getSetKslTankData()).get();
-                    System.out.println("now Inserted into database");
+                  if (kslDataInserted){
+                      System.out.println("Tanks info Inserted into database");
+                  }else {
+                      System.out.println("Tanks info not Inserted into database");
+                  }
+
                 }
 
                 allTanksDataFromKsl = null;
@@ -94,7 +100,7 @@ public class LavelMasterManager {
         }// While
 
         // Get tanks settings     *******************************************************
-        while (!ifTankSettingsWebsocketReady) {
+        while (!ifTankSettingsWebsocketReady && kslDataInserted) {
             try {
                 client.connectToServer(tankSettingsData, new URI(uri));
                 ifTankSettingsWebsocketReady = true;
@@ -149,7 +155,7 @@ public class LavelMasterManager {
 
             try {
 
-               if (!IfTankLiveDataSubscription){
+               if (!IfTankLiveDataSubscription && kslDataInserted){
                    Thread.sleep(1000);
                    JSONObject tankSubscription = new JSONObject();
                    JSONObject tankId = new JSONObject();

@@ -50,13 +50,13 @@ public class AllTanksDataFromKsl {
             if (rs.next()) {
                 //    System.out.println(rs.getString(2));
                 return executor.submit(() -> {
-                    Thread.sleep(2000);
+                  //  Thread.sleep(2000);
                     return true;
                 });
             } else {
                 //   System.out.println(rs);
                 return executor.submit(() -> {
-                    Thread.sleep(2000);
+                 //   Thread.sleep(2000);
                     return false;
                 });
             }
@@ -171,7 +171,7 @@ public class AllTanksDataFromKsl {
             if (node.has("setKslTankData")) {
                 Gson gson = new Gson();
                  kslTanksData = gson.fromJson(message, KslTanksData.class);
-
+             //  System.out.println(kslTanksData);
                 closeSession();
                 //  session.close(new CloseReason(CloseCodes.NORMAL_CLOSURE, "Game ended"));
             }

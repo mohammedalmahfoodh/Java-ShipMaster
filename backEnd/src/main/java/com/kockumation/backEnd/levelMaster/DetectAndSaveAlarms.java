@@ -27,12 +27,57 @@ public class DetectAndSaveAlarms extends Thread {
 
     // Run function ****************  Run function ******************
     public void run() {
-        System.out.println("Inside DetectAndSave Alarms " + Thread.currentThread());
+        //  System.out.println("Inside DetectAndSave Alarms " + Thread.currentThread());
         while (!Thread.currentThread().isInterrupted() && firstRun) {
-            firstRun = false;
-            detectAlarms();
-        }
+
+            boolean makeAlarmsArchived = false;
+            try {
+                makeAlarmsArchived = makeUnresolvedAlarmsArchived().get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+            if (makeAlarmsArchived) {
+
+                System.out.println("Unresolved Alarms becomes Archived ");
+                firstRun = false;
+                detectAlarms();
+            } else {
+                System.out.println("Error connecting database connect to db to update alarms");
+            }
+
+        } // while (!Thread.currentThread().isInterrupted() && firstRun)
     }// Run function ****************  Run function ******************
+
+    // Make Unresolved Alarms Archived  ****************************** Make Unresolved Alarms Archived    ***************************************
+    public Future<Boolean> makeUnresolvedAlarmsArchived() {
+
+        try (Connection conn = MySQLJDBCUtil.getConnection()) {
+
+            String updateAlarms = "UPDATE alarms set archive= ?,alarm_description = ?,blue_alarm = 0,alarm_active = 0,temp_alarm = 0 where alarm_active = 1 || blue_alarm = 1;";
+            PreparedStatement preparedStmt = conn.prepareStatement(updateAlarms, Statement.RETURN_GENERATED_KEYS);
+            preparedStmt.setInt(1, 1);
+            preparedStmt.setString(2, "Archived Alarm");
+
+            int rowAffected = preparedStmt.executeUpdate();
+            System.out.println(rowAffected + " Alarms updated");
+            String updateTanks = "UPDATE tanks set alarm_name = null ;";
+            PreparedStatement preparedStmt2 = conn.prepareStatement(updateTanks, Statement.RETURN_GENERATED_KEYS);
+            int rowAffected2 = preparedStmt2.executeUpdate();
+
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+            return executor.submit(() -> {
+                return false;
+            });
+        }
+        return executor.submit(() -> {
+            //  Thread.sleep(3000);
+            return true;
+        });
+
+    }// Make Unresolved Alarms Archived  ****************************** Make Unresolved Alarms Archived    ***************************************
 
 
     // Insert new alarm into alarms table ****************************** Insert new alarm into alarms table   ***************************************
@@ -55,7 +100,7 @@ public class DetectAndSaveAlarms extends Thread {
             preparedStmt.setBoolean(10, tankDataForMap.isBlue_alarm());
             preparedStmt.setString(11, tankDataForMap.getTime_retrieved());
             int rowAffected = preparedStmt.executeUpdate();
-            System.out.println(rowAffected);
+            // System.out.println(rowAffected);
             String updateTanks = "UPDATE tanks set alarm_name = ? where tank_id = ?;";
             PreparedStatement preparedStmt2 = conn.prepareStatement(updateTanks, Statement.RETURN_GENERATED_KEYS);
             preparedStmt2.setString(1, tankDataForMap.getAlarm_name());
@@ -95,7 +140,7 @@ public class DetectAndSaveAlarms extends Thread {
             preparedStmt.setInt(9, tankDataForMap.getLevel_alarm());
             preparedStmt.setInt(10, tankDataForMap.getTank_id());
             int rowAffected = preparedStmt.executeUpdate();
-            System.out.println(rowAffected);
+            //  System.out.println(rowAffected);
             String updateTanks = "UPDATE tanks set alarm_name = ? where tank_id = ?;";
             PreparedStatement preparedStmt2 = conn.prepareStatement(updateTanks, Statement.RETURN_GENERATED_KEYS);
             preparedStmt2.setString(1, tankDataForMap.getAlarm_name());
@@ -131,7 +176,7 @@ public class DetectAndSaveAlarms extends Thread {
             preparedStmt.setBoolean(6, tankDataForMap.isArchive());
             preparedStmt.setInt(7, tankDataForMap.getTank_id());
             int rowAffected = preparedStmt.executeUpdate();
-            System.out.println(rowAffected);
+            // System.out.println(rowAffected);
 
             String updateTanks = "UPDATE tanks set alarm_name = null where tank_id = ?;";
             PreparedStatement preparedStmt2 = conn.prepareStatement(updateTanks, Statement.RETURN_GENERATED_KEYS);
@@ -185,29 +230,29 @@ public class DetectAndSaveAlarms extends Thread {
     public Future<Boolean> insertNewTempAlarm(TankDataForMap tankDataForMap) {
 
         try (Connection conn = MySQLJDBCUtil.getConnection()) {
-            String query = "INSERT INTO alarms (alarm_name,tank_id,acknowledged,alarm_description,archive,alarm_date,alarm_active,blue_alarm,temp_alarm) VALUES (?,?,?,?,?,?,?,?,?,?,?);";
+            String query = "INSERT INTO alarms (alarm_name,tank_id,acknowledged,alarm_description,archive,alarm_date,alarm_active,blue_alarm,temp_alarm) VALUES (?,?,?,?,?,?,?,?,?);";
 
             PreparedStatement preparedStmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
-
+            // System.out.println(tankDataForMap);
             preparedStmt.setString(1, tankDataForMap.getTemp_alarm_name());
             preparedStmt.setInt(2, tankDataForMap.getTank_id());
             preparedStmt.setBoolean(3, tankDataForMap.isTemp_acknowledged());
             preparedStmt.setString(4, tankDataForMap.getTemp_alarm_description());
             preparedStmt.setBoolean(5, false);
-
             preparedStmt.setString(6, tankDataForMap.getTemp_alarm_date());
-            preparedStmt.setBoolean(7, tankDataForMap.isAlarm_active());
-            preparedStmt.setBoolean(8, tankDataForMap.isBlue_alarm());
+            preparedStmt.setBoolean(7, tankDataForMap.isTemp_alarm_active());
+            preparedStmt.setBoolean(8, tankDataForMap.isTemp_blue_alarm());
             preparedStmt.setBoolean(9, true);
 
             int rowAffected = preparedStmt.executeUpdate();
-            System.out.println(rowAffected);
+            System.out.println(rowAffected + " Temp Alarm inserted");
             String updateTanks = "UPDATE tanks set alarm_name = ? where tank_id = ?;";
             PreparedStatement preparedStmt2 = conn.prepareStatement(updateTanks, Statement.RETURN_GENERATED_KEYS);
             preparedStmt2.setString(1, tankDataForMap.getTemp_alarm_name());
             preparedStmt2.setInt(2, tankDataForMap.getTank_id());
             int rowAffected2 = preparedStmt2.executeUpdate();
         } catch (SQLException ex) {
+
             System.out.println(ex.getMessage());
             return executor.submit(() -> {
                 return false;
@@ -224,19 +269,20 @@ public class DetectAndSaveAlarms extends Thread {
     public Future<Boolean> updateTempAlarm(TankDataForMap tankDataForMap) {
 
         try (Connection conn = MySQLJDBCUtil.getConnection()) {
-            String query = "UPDATE alarms set alarm_description= ?,blue_alarm = ?,alarm_name = ?,alarm_date = ?,time_retrieved = ?,alarm_active = ?,time_accepted = ?,archive =? where tank_id = ? && (alarm_active = 1 || blue_alarm = 1) && (temp_alarm = 1);";
+            String query = "UPDATE alarms set alarm_description= ?,blue_alarm = ?,alarm_name = ?,alarm_date = ?,time_retrieved = ?,alarm_active = ?,time_accepted = ?,archive =?, acknowledged= ? where tank_id = ? && (alarm_active = 1 || blue_alarm = 1) && (temp_alarm = 1);";
 
             PreparedStatement preparedStmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
 
-            preparedStmt.setString(1, tankDataForMap.getAlarm_description());
-            preparedStmt.setBoolean(2, tankDataForMap.isBlue_alarm());
-            preparedStmt.setString(3, tankDataForMap.getAlarm_name());
+            preparedStmt.setString(1, tankDataForMap.getTemp_alarm_description());
+            preparedStmt.setBoolean(2, tankDataForMap.isTemp_blue_alarm());
+            preparedStmt.setString(3, tankDataForMap.getTemp_alarm_name());
             preparedStmt.setString(4, tankDataForMap.getTemp_alarm_date());
             preparedStmt.setString(5, tankDataForMap.getTemp_time_retrieved());
             preparedStmt.setBoolean(6, tankDataForMap.isTemp_alarm_active());
             preparedStmt.setString(7, tankDataForMap.getTemp_time_accepted());
             preparedStmt.setBoolean(8, tankDataForMap.isTemp_archive());
-            preparedStmt.setInt(9, tankDataForMap.getTank_id());
+            preparedStmt.setBoolean(9, tankDataForMap.isTemp_acknowledged());
+            preparedStmt.setInt(10, tankDataForMap.getTank_id());
 
 
             int rowAffected = preparedStmt.executeUpdate();
@@ -261,6 +307,10 @@ public class DetectAndSaveAlarms extends Thread {
 
     // Check for temperature alarm ************************************** Check for temperature alarm ****************************
     public void manageTemperatureAlarms(TankDataForMap tankDataForMap) {
+        //  System.out.println("Now in manage Temp alarms function");
+        if (tankDataForMap.getTank_id() == 30) {
+            //   System.out.println(tankDataForMap);
+        }
 
         if (tankDataForMap.getMeanTemp() > tankDataForMap.getTemperature_limit()) {
             if (tankDataForMap.isUpdate_Temperature_alarm()) {
@@ -278,18 +328,100 @@ public class DetectAndSaveAlarms extends Thread {
                 tankDataForMap.setTemp_acknowledged(false);
                 tankDataForMap.setUpdate_Temperature_blue_alarm(true);
                 tankDataForMap.setTemp_alarm_description("Active unaccepted High Temp Alarm triggered");
-                   if (tankDataForMap.isTemp_inserted()){
+                if (tankDataForMap.isTemp_inserted()) {
+                    updateTempAlarm(tankDataForMap);
+                } else {
+                    System.out.println("Temperature Alarm triggered");
+                    //  insertNewTempAlarm(tankDataForMap);
+                    tankDataForMap.setTemp_inserted(true);
 
-                   }else {
 
-                   }
+                    boolean insertedOrNot = false;
+                    try {
+                        insertedOrNot = insertNewTempAlarm(tankDataForMap).get();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    } catch (ExecutionException e) {
+                        e.printStackTrace();
+                    }
+                    if (insertedOrNot) {
+                        tankDataForMap.setInserted(true);
+                        System.out.println("Temp Alarm for tank " + tankDataForMap.getCode_name() + " inserted");
+                    } else {
+                        System.out.println("Error connecting database connect to db to update alarms");
+                    }
+                }
 
             }//if (tankDataForMap.isUpdate_Temperature_alarm())
         }// if (tankDataForMap.getMeanTemp() > tankDataForMap.getTemperature_limit())
 
         // Check for temperature alarm ******************************************* Check for temperature alarm *******************************
 
-    }
+        // Check for Blue Temperature alarm ****************************************************
+        if (tankDataForMap.getMeanTemp() < tankDataForMap.getTemperature_limit() && tankDataForMap.isTemp_alarm_active() == true && tankDataForMap.isTemp_acknowledged() == false) {
+            if (tankDataForMap.isUpdate_Temperature_blue_alarm() == true) {
+                System.out.println("Inside citerea");
+                tankDataForMap.setUpdate_Temperature_blue_alarm(false);
+                tankDataForMap.setUpdate_Temperature_alarm(true);
+                tankDataForMap.setTemp_alarm_active(false);
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                String temperatureAlarmDate = LocalDateTime.now(Clock.systemUTC()).format(formatter);
+                tankDataForMap.setTemp_time_retrieved(temperatureAlarmDate);
+                tankDataForMap.setTemp_blue_alarm(true);
+                tankDataForMap.setTemp_alarm_description("Inactive unaccepted Temp Alarm");
+                if (tankDataForMap.isTemp_inserted() == true) {
+                    updateTempAlarm(tankDataForMap);
+                }
+
+            }// if (tankDataForMap.isUpdate_Temperature_blue_alarm() == true)
+
+        }// Check for Blue Temperature alarm ****************************************************
+
+
+        // Check for Archive Temperature alarm ****************************************************
+        if (tankDataForMap.getMeanTemp() < tankDataForMap.getTemperature_limit() && tankDataForMap.isTemp_acknowledged() == true) {
+            tankDataForMap.setUpdate_Temperature_blue_alarm(true);
+            tankDataForMap.setUpdate_Temperature_alarm(true);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            String temperatureAlarmDate = LocalDateTime.now(Clock.systemUTC()).format(formatter);
+            if (tankDataForMap.getTemp_time_retrieved() == null || tankDataForMap.getTemp_time_retrieved().length() == 0) {
+                tankDataForMap.setTemp_time_retrieved(temperatureAlarmDate);
+            }
+            if (tankDataForMap.getTemp_time_accepted() == null || tankDataForMap.getTemp_time_accepted().length() == 0) {
+                tankDataForMap.setTemp_time_accepted(temperatureAlarmDate);
+            }
+            tankDataForMap.setTemp_blue_alarm(false);
+            tankDataForMap.setTemp_alarm_description("Archived Temp Alarm");
+            tankDataForMap.setTemp_alarm_active(false);
+            tankDataForMap.setTemp_archive(true);
+            if (tankDataForMap.isTemp_inserted() == true) {
+                boolean insertedOrNot = false;
+                try {
+                    insertedOrNot = updateArchivedAlarm(tankDataForMap).get();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                }
+                if (insertedOrNot) {
+                    tankDataForMap.setTemp_inserted(false);
+                    System.out.println("Temp Alarm for tank " + tankDataForMap.getCode_name() + " became archived");
+                    tankDataForMap.setTemp_alarm_name(null);
+                    tankDataForMap.setTemp_alarm_date(null);
+                    tankDataForMap.setTemp_time_retrieved(null);
+                    tankDataForMap.setTemp_time_accepted(null);
+                    tankDataForMap.setTemp_alarm_description(null);
+                    tankDataForMap.setTemp_archive(false);
+                    tankDataForMap.setTemp_acknowledged(false);
+                } else {
+                    System.out.println("Error connecting database connect to db to update alarms");
+                }
+            }
+
+        }// Check for Archive Temperature alarm ****************************************************
+
+
+    } // public void manageTemperatureAlarms(TankDataForMap tankDataForMap)
 
     public void detectAlarms() {
 
@@ -298,7 +430,8 @@ public class DetectAndSaveAlarms extends Thread {
             public void run() {
                 if (TankLiveDataSubscription.tankSubscriptionData != null) {
 
-                    //    System.out.println(TankLiveDataSubscription.tankSubscriptionData.getSetTankSubscriptionData());
+                    //  System.out.println("***** Level Alarms server is running *****");
+
                     for (TankAlarmData tankAlarmData : TankLiveDataSubscription.tankSubscriptionData.getSetTankSubscriptionData()) {
                         TankDataForMap tankDataForMap = LavelMasterManager.tankMapData.get(tankAlarmData.getTankId());
                         tankDataForMap.setMeanTemp(tankAlarmData.getMeanTemp());
@@ -318,7 +451,8 @@ public class DetectAndSaveAlarms extends Thread {
                                 String alarmDateTriggered = LocalDateTime.now(Clock.systemUTC()).format(formatter);
                                 tankDataForMap.setAlarm_date(alarmDateTriggered);
                             }
-                            System.out.println("Tank Code: " + tankDataForMap.getCode_name() + " Is Inserted " + tankDataForMap.isInserted() + " Is Blue: " + tankDataForMap.isBlue_alarm() + " Is Active " + tankDataForMap.isAlarm_active() + " Level_alarm: " + tankDataForMap.getLevel_alarm() + " Description " + tankDataForMap.getAlarm_description() + " Alarm Date " + tankDataForMap.getAlarm_date() + " Time_retrieved " + tankDataForMap.getTime_retrieved());
+                            //    System.out.println("Tank Code: " + tankDataForMap.getCode_name() + " Is Inserted " + tankDataForMap.isInserted() + " Is Blue: " + tankDataForMap.isBlue_alarm() + " Is Active " + tankDataForMap.isAlarm_active() + " Level_alarm: " + tankDataForMap.getLevel_alarm() + " Description " + tankDataForMap.getAlarm_description() + " Alarm Date " + tankDataForMap.getAlarm_date() + " Time_retrieved " + tankDataForMap.getTime_retrieved());
+
                             // Check if tank level will reach beyond limits (High ,high high , low and low low) ********************************
                             if (tankDataForMap.getTankLowLowLevel() != -10 && tankDataForMap.getTankLowLevel() != -10) {
                                 if ((tankAlarmData.getLevel() > tankDataForMap.getTankLowLevel())) {
@@ -873,7 +1007,7 @@ public class DetectAndSaveAlarms extends Thread {
 
                         } else {// tankAlarmData.getLevel() > 0 ************************ If Level Alarm > 0  *****************
 
-                            if (tankDataForMap.isAcknowledged()) {
+                            if (tankDataForMap.isAcknowledged() || (tankDataForMap.isBlue_alarm())) {
                                 if (tankDataForMap.getTime_retrieved() == null) {
                                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
                                     String time_retrieved = LocalDateTime.now(Clock.systemUTC()).format(formatter);

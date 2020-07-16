@@ -158,7 +158,7 @@ public class LavelMasterManager {
                    String tankSubscriptionStr = tankSubscription.toString();
                    client.connectToServer(tankLiveDataSubscription, new URI(uri));
                    tankLiveDataSubscription.sendMessage(tankSubscriptionStr);
-                   IfTankLiveDataSubscription =true;
+                   IfTankLiveDataSubscription = true;
                }
 
 

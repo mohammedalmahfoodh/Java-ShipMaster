@@ -286,7 +286,7 @@ public class DetectAndSaveAlarms extends Thread {
 
 
             int rowAffected = preparedStmt.executeUpdate();
-            System.out.println(rowAffected);
+            System.out.println(rowAffected + " Temp Alarm updated.");
             String updateTanks = "UPDATE tanks set alarm_name = ? where tank_id = ?;";
             PreparedStatement preparedStmt2 = conn.prepareStatement(updateTanks, Statement.RETURN_GENERATED_KEYS);
             preparedStmt2.setString(1, tankDataForMap.getAlarm_name());
@@ -309,7 +309,7 @@ public class DetectAndSaveAlarms extends Thread {
     public void manageTemperatureAlarms(TankDataForMap tankDataForMap) {
         //  System.out.println("Now in manage Temp alarms function");
         if (tankDataForMap.getTank_id() == 30) {
-            //   System.out.println(tankDataForMap);
+           //    System.out.println(tankDataForMap);
         }
 
         if (tankDataForMap.getMeanTemp() > tankDataForMap.getTemperature_limit()) {
@@ -397,7 +397,7 @@ public class DetectAndSaveAlarms extends Thread {
             if (tankDataForMap.isTemp_inserted() == true) {
                 boolean insertedOrNot = false;
                 try {
-                    insertedOrNot = updateArchivedAlarm(tankDataForMap).get();
+                    insertedOrNot = updateTempAlarm(tankDataForMap).get();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 } catch (ExecutionException e) {
@@ -434,6 +434,9 @@ public class DetectAndSaveAlarms extends Thread {
 
                     for (TankAlarmData tankAlarmData : TankLiveDataSubscription.tankSubscriptionData.getSetTankSubscriptionData()) {
                         TankDataForMap tankDataForMap = LavelMasterManager.tankMapData.get(tankAlarmData.getTankId());
+                        if (tankDataForMap.getTank_id() == 11){
+                            System.out.println(tankDataForMap);
+                        }
                         tankDataForMap.setMeanTemp(tankAlarmData.getMeanTemp());
                         tankDataForMap.setLevel(tankAlarmData.getLevel());
                         tankDataForMap.setVolume(tankAlarmData.getVolume());

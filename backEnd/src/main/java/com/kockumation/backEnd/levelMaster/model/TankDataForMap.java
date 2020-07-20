@@ -6,7 +6,7 @@ public class TankDataForMap {
     private int tank_id;
     private float meanTemp;
     private float level;
-    private int temperature_limit;
+    private float temperature_limit;
     private boolean update_Temperature_alarm;
     private boolean update_Temperature_blue_alarm;
     private boolean update_Temperature_archive;
@@ -149,11 +149,11 @@ public class TankDataForMap {
         this.meanTemp = meanTemp;
     }
 
-    public int getTemperature_limit() {
+    public float getTemperature_limit() {
         return temperature_limit;
     }
 
-    public void setTemperature_limit(int temperature_limit) {
+    public void setTemperature_limit(float temperature_limit) {
         this.temperature_limit = temperature_limit;
     }
 

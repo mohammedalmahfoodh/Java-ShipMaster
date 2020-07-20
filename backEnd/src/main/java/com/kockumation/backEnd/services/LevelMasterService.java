@@ -145,7 +145,7 @@ public class LevelMasterService {
                 });
             }
 
-        }else {
+        } else {
             return executor.submit(() -> {
                 return false;
             });
@@ -158,7 +158,6 @@ public class LevelMasterService {
         if (LavelMasterManager.tankMapData.containsKey(levelPostObject.getTank_id())) {
             TankDataForMap tankDataForMap = LavelMasterManager.tankMapData.get(levelPostObject.getTank_id());
             tankDataForMap.setDensity(levelPostObject.getDensity());
-
 
             try (Connection conn = MySQLJDBCUtil.getConnection()) {
 
@@ -179,7 +178,7 @@ public class LevelMasterService {
                 });
             }
 
-        }else {
+        } else {
             return executor.submit(() -> {
                 return false;
             });
@@ -187,6 +186,65 @@ public class LevelMasterService {
 
     } // Update Tanks Density ***** Update Tanks Density   **************  Update Tanks Density
 
+    // Set temperature limit  ******** Set temperature limit   **************  Set temperature limit
+    public Future<Boolean> setTemperatureLimit(LevelPostObject levelPostObject) {
+        if (LavelMasterManager.tankMapData.containsKey(levelPostObject.getTank_id())) {
+            TankDataForMap tankDataForMap = LavelMasterManager.tankMapData.get(levelPostObject.getTank_id());
+            tankDataForMap.setTemperature_limit(levelPostObject.getTemp_limit());
+
+            try (Connection conn = MySQLJDBCUtil.getConnection()) {
+
+                String updateTanksVolumeH = "UPDATE tanks set temperature_limit = ? where tank_id = ? ;";
+                PreparedStatement preparedStmt = conn.prepareStatement(updateTanksVolumeH, Statement.RETURN_GENERATED_KEYS);
+                preparedStmt.setFloat(1, levelPostObject.getTemp_limit());
+                preparedStmt.setInt(2, tankDataForMap.getTank_id());
+                int rowAffected = preparedStmt.executeUpdate();
+                System.out.println("Tank's Temperature limit has been updated");
+                return executor.submit(() -> {
+                    return true;
+                });
+
+            } catch (SQLException ex) {
+                System.out.println(ex.getMessage());
+                return executor.submit(() -> {
+                    return false;
+                });
+            }
+        } else {
+            return executor.submit(() -> {
+                return false;
+            });
+        } // else
+
+    } // Set temperature limit  ******** Set temperature limit   **************  Set temperature limit
+
+    //Get  temperature limit. ******************** Get  temperature limit. ****************************************************
+    public Future<Integer> getTemperatureLimit(int tank_id) {
+        int temperatureLimit = 0;
+        try (Connection conn = MySQLJDBCUtil.getConnection()) {
+            String query = "select t.temperature_limit  from  tanks t WHERE tank_id = ?";
+            PreparedStatement preparedStmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+            preparedStmt.setInt(1, tank_id);
+            ResultSet rs = preparedStmt.executeQuery();
+
+            while (rs.next()) {
+                temperatureLimit = rs.getInt("temperature_limit");
+
+            }
+
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+            int finalTemperatureLimit = temperatureLimit;
+            return executor.submit(() -> {
+                return finalTemperatureLimit;
+            });
+        } // End of catch
+        int finalTemperatureLimit1 = temperatureLimit;
+        return executor.submit(() -> {
+            return finalTemperatureLimit1;
+        });
+
+    }//Get  temperature limit. ******************** Get  temperature limit. ****************************************************
 
 
 } // Class

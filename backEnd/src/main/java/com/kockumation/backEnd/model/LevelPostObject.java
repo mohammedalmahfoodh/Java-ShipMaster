@@ -19,6 +19,16 @@ public class LevelPostObject {
   private float  high_alarm_limit;
     @NotNull
     private float density;
+    @NotNull
+    private float temp_limit;
+
+    public float getTemp_limit() {
+        return temp_limit;
+    }
+
+    public void setTemp_limit(float temp_limit) {
+        this.temp_limit = temp_limit;
+    }
 
     public int getTank_id() {
         return tank_id;

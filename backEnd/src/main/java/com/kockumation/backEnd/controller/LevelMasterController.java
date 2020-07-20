@@ -25,22 +25,23 @@ public class LevelMasterController {
     @PostMapping("/acceptTempAlarm")
     public ResponseEntity postController(@RequestBody @Valid LevelPostObject levelPostObject) {
 
-       boolean acceptedOrNot =  levelMasterService.makeTempAlarmAcknowledged(levelPostObject.getTank_id());
-       if (acceptedOrNot){
-           return ResponseEntity.ok(HttpStatus.OK);
-       }else {
-           return ResponseEntity.ok(HttpStatus.BAD_REQUEST);
-       }
+        boolean acceptedOrNot = levelMasterService.makeTempAlarmAcknowledged(levelPostObject.getTank_id());
+        if (acceptedOrNot) {
+            return ResponseEntity.ok(HttpStatus.OK);
+        } else {
+            return ResponseEntity.ok(HttpStatus.BAD_REQUEST);
+        }
 
     }// Accept Temp Alarm  ****************   Accept Temp Alarm   *********************
 
     // Get hundred Alarms  ****************   Get hundred Alarms   *********************
     @GetMapping("/hundredAlarms")
-    public @ResponseBody ResponseEntity<List<Alarm>> getHundredAlarms() {
-     List<Alarm>alarmList = new ArrayList<>();
+    public @ResponseBody
+    ResponseEntity<List<Alarm>> getHundredAlarms() {
+        List<Alarm> alarmList = new ArrayList<>();
         try {
-            alarmList =levelMasterService.getHundredAlarms().get();
-            if (alarmList.size() == 0){
+            alarmList = levelMasterService.getHundredAlarms().get();
+            if (alarmList.size() == 0) {
                 System.out.println("No Alarms");
                 return new ResponseEntity<List<Alarm>>(alarmList, HttpStatus.NO_CONTENT);
             }
@@ -59,36 +60,63 @@ public class LevelMasterController {
     @PostMapping("/updateTankLAHA")
     public ResponseEntity<String> updateTankLowAndHighLimit(@RequestBody @Valid LevelPostObject levelPostObject) {
 
-
         try {
-             levelMasterService.updateTankLowAndHighLimit(levelPostObject).get();
-            return new ResponseEntity<>("Tank id "+levelPostObject.getTank_id()+" High and low updated ",HttpStatus.OK);
+            levelMasterService.updateTankLowAndHighLimit(levelPostObject).get();
+            return new ResponseEntity<>("Tank id " + levelPostObject.getTank_id() + " High and low updated ", HttpStatus.OK);
         } catch (InterruptedException e) {
             e.printStackTrace();
-            return new ResponseEntity<>("Tank id "+levelPostObject.getTank_id()+" Bad Request ",HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Tank id " + levelPostObject.getTank_id() + " Bad Request ", HttpStatus.BAD_REQUEST);
         } catch (ExecutionException e) {
-            return new ResponseEntity<>("Tank id "+levelPostObject.getTank_id()+" Bad Request ",HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Tank id " + levelPostObject.getTank_id() + " Bad Request ", HttpStatus.BAD_REQUEST);
         }
-
 
     }// Accept Temp Alarm  ****************   Accept Temp Alarm   *********************
 
-    // Accept Temp Alarm  ****************   Accept Temp Alarm   *********************
+    // Update tank density  ****************   Update tank density   *********************
     @PostMapping("/updateTankDensity")
     public ResponseEntity<String> updateTankDensity(@RequestBody @Valid LevelPostObject levelPostObject) {
-
-
         try {
             levelMasterService.updateTankDensity(levelPostObject).get();
-            return new ResponseEntity<>("Tank id "+levelPostObject.getTank_id()+" density updated ",HttpStatus.OK);
+            return new ResponseEntity<>("Tank id " + levelPostObject.getTank_id() + " density updated ", HttpStatus.OK);
         } catch (InterruptedException e) {
             e.printStackTrace();
-            return new ResponseEntity<>("Tank id "+levelPostObject.getTank_id()+" Bad Request ",HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Tank id " + levelPostObject.getTank_id() + " Bad Request ", HttpStatus.BAD_REQUEST);
         } catch (ExecutionException e) {
-            return new ResponseEntity<>("Tank id "+levelPostObject.getTank_id()+" Bad Request ",HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Tank id " + levelPostObject.getTank_id() + " Bad Request ", HttpStatus.BAD_REQUEST);
         }
 
+    } // Update tank density  ****************   Update tank density   *********************
 
-    }// Accept Temp Alarm  ****************   Accept Temp Alarm   *********************
+    // Set temperature limit  ******** Set temperature limit   **************  Set temperature limit
+    @PostMapping("/setLimitTemp")
+    public ResponseEntity<String> setTemperatureLimit(@RequestBody @Valid LevelPostObject levelPostObject) {
+        try {
+            levelMasterService.setTemperatureLimit(levelPostObject).get();
+            return new ResponseEntity<>("Tank id " + levelPostObject.getTank_id() + " temperature limit updated ", HttpStatus.OK);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>("Tank id " + levelPostObject.getTank_id() + " Bad Request ", HttpStatus.BAD_REQUEST);
+        } catch (ExecutionException e) {
+            return new ResponseEntity<>("Tank id " + levelPostObject.getTank_id() + " Bad Request ", HttpStatus.BAD_REQUEST);
+        }
+
+    } // Set temperature limit  ******** Set temperature limit   **************  Set temperature limit
+
+    // Get temperature limit  ******** Get temperature limit   **************  Get temperature limit
+    @PostMapping("/getTemperatureLimit")
+    public ResponseEntity<Integer> getTemperatureLimit(@RequestBody @Valid LevelPostObject levelPostObject) {
+        int tempL = -1;
+        try {
+        tempL = levelMasterService.getTemperatureLimit(levelPostObject.getTank_id()).get();
+            return new ResponseEntity<>(tempL, HttpStatus.OK);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(tempL, HttpStatus.BAD_REQUEST);
+        } catch (ExecutionException e) {
+            return new ResponseEntity<>(tempL, HttpStatus.BAD_REQUEST);
+        }
+
+    } // Set temperature limit  ******** Set temperature limit   **************  Set temperature limit
+
 
 }

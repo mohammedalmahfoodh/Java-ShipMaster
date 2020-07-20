@@ -2,6 +2,7 @@ package com.kockumation.backEnd.levelMaster;
 
 import com.kockumation.backEnd.levelMaster.model.KslTankData;
 import com.kockumation.backEnd.levelMaster.model.TankDataForMap;
+import com.kockumation.backEnd.utilities.MySQLJDBCUtil;
 import org.glassfish.tyrus.client.ClientManager;
 import org.json.simple.JSONObject;
 
@@ -17,11 +18,14 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
 public class LavelMasterManager {
     //  private final String uri = "ws://localhost:8089";
-     private final String uri="ws://192.168.190.232:8089";
+   // private final String uri="ws://192.168.190.232:8089";
+    private final String  uri ="ws://127.0.0.1:8089";
+
 
     AllTanksDataFromKsl allTanksDataFromKsl;
     TankSettingsData tankSettingsData;
@@ -32,7 +36,9 @@ public class LavelMasterManager {
     public static boolean WebSocketSettingsClosed = false;
     public static boolean checkIfDataExistsInDB = false;
     public static boolean IfTankLiveDataSubscription = false;
+
     public LavelMasterManager() {
+
         allTanksDataFromKsl = new AllTanksDataFromKsl();
         tankSettingsData = new TankSettingsData();
         tankLiveDataSubscription = new TankLiveDataSubscription();
@@ -44,9 +50,6 @@ public class LavelMasterManager {
     }
 
     public void levelMasterEngine() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        String now = LocalDateTime.now(Clock.systemUTC()).format(formatter);
-        System.out.println(now);
 
         boolean ifWebsocketReady = false;
         boolean ifTankSettingsWebsocketReady = false;
@@ -64,9 +67,9 @@ public class LavelMasterManager {
 
                 client.connectToServer(allTanksDataFromKsl, new URI(uri));
                 allTanksDataFromKsl.sendMessage(getKslTankDataStr);
+                System.out.println(getKslTankDataStr);
                 ifWebsocketReady = true;
-              //  kslWebSocketClosed = allTanksDataFromKsl.onClose().get();
-              //  System.out.println("now closed inside manager");
+
                 checkIfDataExistsInDB = allTanksDataFromKsl.checkIfDataExists().get();
                 if (checkIfDataExistsInDB) {
                     System.out.println("Data exists in db");
@@ -75,11 +78,11 @@ public class LavelMasterManager {
                 } else {
                     System.out.println("No Data exists in db");
                     kslDataInserted = allTanksDataFromKsl.insertAllKslDataIntoTanks(allTanksDataFromKsl.getKslTanksData().getSetKslTankData()).get();
-                  if (kslDataInserted){
-                      System.out.println("Tanks info Inserted into database");
-                  }else {
-                      System.out.println("Tanks info not Inserted into database");
-                  }
+                    if (kslDataInserted) {
+                        System.out.println("Tanks info Inserted into database");
+                    } else {
+                        System.out.println("Tanks info not Inserted into database");
+                    }
 
                 }
 
@@ -146,7 +149,7 @@ public class LavelMasterManager {
         }  // Get tanks settings     *******************************************************
 
         // Subscribe to tanks live data   ************** Subscribe to tanks live data **********************
-        while (true){
+        while (true) {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -155,28 +158,27 @@ public class LavelMasterManager {
 
             try {
 
-               if (!IfTankLiveDataSubscription && kslDataInserted){
-                   Thread.sleep(1000);
-                   JSONObject tankSubscription = new JSONObject();
-                   JSONObject tankId = new JSONObject();
-                   tankId.put("tankId",0);
-                   tankSubscription.put("setTankSubscriptionOn", tankId);
-                   String tankSubscriptionStr = tankSubscription.toString();
-                   client.connectToServer(tankLiveDataSubscription, new URI(uri));
-                   tankLiveDataSubscription.sendMessage(tankSubscriptionStr);
-                   IfTankLiveDataSubscription = true;
-               }
-
+                if (!IfTankLiveDataSubscription && kslDataInserted) {
+                    Thread.sleep(1000);
+                    JSONObject tankSubscription = new JSONObject();
+                    JSONObject tankId = new JSONObject();
+                    tankId.put("tankId", 0);
+                    tankSubscription.put("setTankSubscriptionOn", tankId);
+                    String tankSubscriptionStr = tankSubscription.toString();
+                    client.connectToServer(tankLiveDataSubscription, new URI(uri));
+                    tankLiveDataSubscription.sendMessage(tankSubscriptionStr);
+                    IfTankLiveDataSubscription = true;
+                }
 
 
             } catch (InterruptedException e) {
                 //e.printStackTrace();
             } catch (DeploymentException e) {
                 System.out.println("Live Data Websocket not ready start websocket server.");
-                IfTankLiveDataSubscription =false;
-              //  e.printStackTrace();
+                IfTankLiveDataSubscription = false;
+                //  e.printStackTrace();
             } catch (IOException e) {
-             //   e.printStackTrace();
+                //   e.printStackTrace();
             } catch (URISyntaxException e) {
                 e.printStackTrace();
             }

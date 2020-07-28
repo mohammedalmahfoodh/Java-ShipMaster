@@ -1,7 +1,7 @@
 package com.kockumation.backEnd.services;
 
 import com.kockumation.backEnd.levelMaster.DetectAndSaveAlarms;
-import com.kockumation.backEnd.levelMaster.LavelMasterManager;
+import com.kockumation.backEnd.levelMaster.LevelMasterManager;
 import com.kockumation.backEnd.levelMaster.model.TankDataForMap;
 import com.kockumation.backEnd.model.Alarm;
 import com.kockumation.backEnd.model.LevelPostObject;
@@ -26,8 +26,8 @@ public class LevelMasterService {
 
     //Make temp alarm Acknowledged ******************** Make temp alarm Acknowledged ****************************************************
     public boolean makeTempAlarmAcknowledged(int tank_id) {
-        if (LavelMasterManager.tankMapData.containsKey(tank_id)) {
-            TankDataForMap tankDataForMap = LavelMasterManager.tankMapData.get(tank_id);
+        if (LevelMasterManager.tankMapData.containsKey(tank_id)) {
+            TankDataForMap tankDataForMap = LevelMasterManager.tankMapData.get(tank_id);
             if ((tankDataForMap.isTemp_alarm_active() == true || tankDataForMap.isTemp_blue_alarm() == true) && tankDataForMap.isTemp_acknowledged() == false) {
 
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -120,8 +120,8 @@ public class LevelMasterService {
 
     // update Tanks Low limit and High limit ***** update Tanks Low limit and High limit
     public Future<Boolean> updateTankLowAndHighLimit(LevelPostObject levelPostObject) {
-        if (LavelMasterManager.tankMapData.containsKey(levelPostObject.getTank_id())) {
-            TankDataForMap tankDataForMap = LavelMasterManager.tankMapData.get(levelPostObject.getTank_id());
+        if (LevelMasterManager.tankMapData.containsKey(levelPostObject.getTank_id())) {
+            TankDataForMap tankDataForMap = LevelMasterManager.tankMapData.get(levelPostObject.getTank_id());
             tankDataForMap.setTankLowLevel(levelPostObject.getLow_alarm_limit());
             tankDataForMap.setTankHighLevel(levelPostObject.getHigh_alarm_limit());
 
@@ -155,8 +155,8 @@ public class LevelMasterService {
 
     // Update Tanks Density ***** Update Tanks Density   **************  Update Tanks Density
     public Future<Boolean> updateTankDensity(LevelPostObject levelPostObject) {
-        if (LavelMasterManager.tankMapData.containsKey(levelPostObject.getTank_id())) {
-            TankDataForMap tankDataForMap = LavelMasterManager.tankMapData.get(levelPostObject.getTank_id());
+        if (LevelMasterManager.tankMapData.containsKey(levelPostObject.getTank_id())) {
+            TankDataForMap tankDataForMap = LevelMasterManager.tankMapData.get(levelPostObject.getTank_id());
             tankDataForMap.setDensity(levelPostObject.getDensity());
 
             try (Connection conn = MySQLJDBCUtil.getConnection()) {
@@ -188,8 +188,8 @@ public class LevelMasterService {
 
     // Set temperature limit  ******** Set temperature limit   **************  Set temperature limit
     public Future<Boolean> setTemperatureLimit(LevelPostObject levelPostObject) {
-        if (LavelMasterManager.tankMapData.containsKey(levelPostObject.getTank_id())) {
-            TankDataForMap tankDataForMap = LavelMasterManager.tankMapData.get(levelPostObject.getTank_id());
+        if (LevelMasterManager.tankMapData.containsKey(levelPostObject.getTank_id())) {
+            TankDataForMap tankDataForMap = LevelMasterManager.tankMapData.get(levelPostObject.getTank_id());
             tankDataForMap.setTemperature_limit(levelPostObject.getTemp_limit());
 
             try (Connection conn = MySQLJDBCUtil.getConnection()) {

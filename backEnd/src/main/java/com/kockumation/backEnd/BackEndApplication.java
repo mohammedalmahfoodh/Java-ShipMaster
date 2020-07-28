@@ -1,7 +1,12 @@
 package com.kockumation.backEnd;
 
-import com.kockumation.backEnd.levelMaster.LavelMasterManager;
+import com.kockumation.backEnd.ValvesMaster.DetectAndSaveValvesAlarms;
+import com.kockumation.backEnd.ValvesMaster.ValvesMasterManager;
+import com.kockumation.backEnd.levelMaster.LevelMasterManager;
 import com.kockumation.backEnd.utilities.MySQLJDBCUtil;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -26,8 +31,13 @@ public class BackEndApplication {
           checkDataBase = false;
 			 System.out.println(String.format("Connected to database %s "
 					 + "successfully.", conn.getCatalog()));
-			 LavelMasterManager lavelMasterManager = new LavelMasterManager();
-			 lavelMasterManager.levelMasterEngine();
+			 LevelMasterManager levelMasterManager = new LevelMasterManager();
+			 ValvesMasterManager valvesMasterManager = new ValvesMasterManager();
+
+
+
+			 valvesMasterManager.start();
+			 //levelMasterManager.start();
 
 		 } catch (SQLException ex) {
 			 //System.out.println(ex.getMessage());

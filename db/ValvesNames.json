@@ -1,0 +1,301 @@
+{
+"valvesNames":[
+  { "id":1,
+    "valveName":"BAV01"
+  },
+  { "id":2,
+    "valveName":"BAV02"
+  },
+  { "id":3,
+    "valveName":"BAV03"
+  },
+  { "id":4,
+    "valveName":"BAV04"
+  },
+   { "id":5,
+    "valveName":"BAV05"
+  },
+  { "id":6,
+    "valveName":"BAV06"
+  },
+  { "id":7,
+    "valveName":"BAV07"
+  },
+  { "id":8,
+    "valveName":"BAV08"
+  },
+ { "id":9,
+    "valveName":"BAV09"
+  },
+  { "id":10,
+    "valveName":"BAV010"
+  },
+  { "id":11,
+    "valveName":"BAV011"
+  },
+  { "id":12,
+    "valveName":"BAV012"
+  },
+   { "id":13,
+    "valveName":"BAV013"
+  },
+  { "id":14,
+    "valveName":"BAV014"
+  },
+  { "id":15,
+    "valveName":"BAV015"
+  },
+  { "id":16,
+    "valveName":"BAV016"
+  },
+ { "id":17,
+    "valveName":"BAV017"
+  },
+  { "id":18,
+    "valveName":"BAV018"
+  },
+  { "id":19,
+    "valveName":"IAV04"
+  },
+  { "id":20,
+    "valveName":"IAV06"
+  },
+   { "id":21,
+    "valveName":"IAV22"
+  },
+  { "id":22,
+    "valveName":"IAV16"
+  },
+  { "id":23,
+    "valveName":"IAV24"
+  },
+  { "id":24,
+    "valveName":"IAV26"
+  },
+ { "id":25,
+    "valveName":"IAV02"
+  },
+  { "id":26,
+    "valveName":"IAV08"
+  },
+  { "id":27,
+    "valveName":"BAV28"
+  },
+  { "id":28,
+    "valveName":"IAV30"
+  },
+   { "id":29,
+    "valveName":"IAV18"
+  },
+  { "id":30,
+    "valveName":"IAV20"
+  },
+  { "id":31,
+    "valveName":"BAV10"
+  },
+  { "id":32,
+    "valveName":"BAV12"
+  },
+ { "id":33,
+    "valveName":"IAV14"
+  },
+  { "id":34,
+    "valveName":"FTV06"
+  },
+  { "id":35,
+    "valveName":"FTV07"
+  },
+  { "id":36,
+    "valveName":"FTV08"
+  },
+   { "id":37,
+    "valveName":"FTV09"
+  },
+  { "id":38,
+    "valveName":"FTV11"
+  },
+  { "id":39,
+    "valveName":"FTV12"
+  },
+  { "id":40,
+    "valveName":"FTV13"
+  },
+ { "id":41,
+    "valveName":"MTV05"
+  },
+  { "id":42,
+    "valveName":"MTV07"
+  },
+  { "id":43,
+    "valveName":"BMV15"
+  },
+  { "id":44,
+    "valveName":"BMV01"
+  },
+   { "id":45,
+    "valveName":"BMV02"
+  },
+  { "id":46,
+    "valveName":"BMV03"
+  },
+  { "id":47,
+    "valveName":"BMV05"
+  },
+  { "id":48,
+    "valveName":"BMV07"
+  },
+ { "id":49,
+    "valveName":"BMV09"
+  },
+  { "id":50,
+    "valveName":"BMV10"
+  },
+  { "id":51,
+    "valveName":"BMV11"
+  },
+  { "id":52,
+    "valveName":"BMV12"
+  },
+  { "id":53,
+    "valveName":"BMV13"
+  },
+   { "id":54,
+    "valveName":"BMV16"
+  },
+  { "id":55,
+    "valveName":"WMV01"
+  },
+  { "id":56,
+    "valveName":"WMV02"
+  },
+  { "id":57,
+    "valveName":"CSV01"
+  },
+ { "id":58,
+    "valveName":"CSV04"
+  },
+  { "id":59,
+    "valveName":"BMV18"
+  },
+  { "id":60,
+    "valveName":"BOW THRUSTER ROOM"
+  },
+  { "id":61,
+    "valveName":"PIPE TUNNEL FWD"
+  },
+   { "id":62,
+    "valveName":"PIPE TUNNEL MID"
+  },
+  { "id":63,
+    "valveName":"PIPE TUNNEL AFT"
+  },
+  { "id":64,
+    "valveName":"CAR DECK FWD PS"
+  },
+  { "id":65,
+    "valveName":"CAR DECK FWD STB"
+  },
+ { "id":66,
+    "valveName":"CAR DECK MID PS"
+  },
+  { "id":67,
+    "valveName":"CAR DECK MID STB"
+  },
+  { "id":68,
+    "valveName":"CAR DECK AFT PS"
+  },
+  { "id":69,
+    "valveName":"CAR DECK AFT  STB"
+  },
+   { "id":70,
+    "valveName":"CHAIN LOCKER"
+  },
+  { "id":71,
+    "valveName":"BOSUN LOCKER"
+  },
+  { "id":72,
+    "valveName":"FGSS"
+  },
+  { "id":73,
+    "valveName":"LNG TANK SPACE PS"
+  },
+ { "id":74,
+    "valveName":"LNG TANK SPACE STB"
+  },
+  { "id":75,
+    "valveName":"E/R FWD PS"
+  },
+  { "id":76,
+    "valveName":"E/R FWD STB"
+  },
+  { "id":77,
+    "valveName":"BENEATH M/E"
+  },
+   { "id":78,
+    "valveName":"AFT"
+  },
+  { "id":79,
+    "valveName":"VOID"
+  },
+  { "id":80,
+    "valveName":"STEERING ROOM PS"
+  },
+  { "id":81,
+    "valveName":"STEERING ROOM STB"
+  },
+ { "id":82,
+    "valveName":"LOCAL/REMOTE BAV18"
+  },
+  { "id":83,
+    "valveName":"UPS BAV18"
+  },
+  { "id":84,
+    "valveName":"WBTS"
+  },
+  { "id":85,
+    "valveName":"COMMON ALARM"
+  },
+   { "id":86,
+    "valveName":"CABINET TEMP"
+  },
+  { "id":87,
+    "valveName":"24VDC ALARM"
+  },
+  { "id":88,
+    "valveName":"220VAC ALARM"
+  },
+  { "id":89,
+    "valveName":"ANTI HEELING ALARM"
+  },
+ { "id":90,
+    "valveName":"UPS VRC ACTIVE"
+  },
+  { "id":91,
+    "valveName":"BMV33"
+  },
+  { "id":92,
+    "valveName":"BMV35"
+  },
+  { "id":93,
+    "valveName":"CSV01 LOCAL"
+  },
+   { "id":94,
+    "valveName":"CSV04 LOCAL"
+  },
+  { "id":95,
+    "valveName":""
+  },
+  { "id":96,
+    "valveName":""
+  },
+  { "id":97,
+    "valveName":""
+  },
+ { "id":98,
+    "valveName":"PLC1"
+  },
+  { "id":99,
+    "valveName":"PLC2"
+  }
+  ]
+}

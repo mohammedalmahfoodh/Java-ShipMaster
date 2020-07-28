@@ -1,35 +1,26 @@
 package com.kockumation.backEnd.levelMaster;
 
-import com.kockumation.backEnd.levelMaster.model.KslTankData;
+import com.kockumation.backEnd.global.GlobalVariableSingleton;
 import com.kockumation.backEnd.levelMaster.model.TankDataForMap;
-import com.kockumation.backEnd.utilities.MySQLJDBCUtil;
-import org.glassfish.tyrus.client.ClientManager;
 import org.json.simple.JSONObject;
 
 import javax.websocket.DeploymentException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.Clock;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
-public class LavelMasterManager {
+public class LevelMasterManager extends Thread {
     //  private final String uri = "ws://localhost:8089";
-   // private final String uri="ws://192.168.190.232:8089";
-    private final String  uri ="ws://127.0.0.1:8089";
+    private final String uri="ws://192.168.190.232:8089";
+  //  private final String  uri ="ws://127.0.0.1:8089";
 
 
     AllTanksDataFromKsl allTanksDataFromKsl;
     TankSettingsData tankSettingsData;
-    TankLiveDataSubscription tankLiveDataSubscription;
+    LiveDataWebsocketClient liveDataWebsocketClient;
     public static Map<Integer, TankDataForMap> tankMapData = new HashMap<Integer, TankDataForMap>();
     public static boolean kslDataInserted = false;
     public static boolean kslWebSocketClosed = false;
@@ -37,11 +28,11 @@ public class LavelMasterManager {
     public static boolean checkIfDataExistsInDB = false;
     public static boolean IfTankLiveDataSubscription = false;
 
-    public LavelMasterManager() {
+    public LevelMasterManager() {
 
         allTanksDataFromKsl = new AllTanksDataFromKsl();
         tankSettingsData = new TankSettingsData();
-        tankLiveDataSubscription = new TankLiveDataSubscription();
+        liveDataWebsocketClient = new LiveDataWebsocketClient();
     }
 
     public boolean checkIfInserted() {
@@ -49,12 +40,16 @@ public class LavelMasterManager {
         return kslDataInserted;
     }
 
+    @Override
+    public void run() {
+        levelMasterEngine();
+    }
+
     public void levelMasterEngine() {
 
         boolean ifWebsocketReady = false;
         boolean ifTankSettingsWebsocketReady = false;
 
-        ClientManager client = ClientManager.createClient();
         JSONObject getKslTankData = new JSONObject();
         JSONObject vessel2 = new JSONObject();
         vessel2.put("vessel", 1);
@@ -65,7 +60,7 @@ public class LavelMasterManager {
         while (!ifWebsocketReady) {
             try {
 
-                client.connectToServer(allTanksDataFromKsl, new URI(uri));
+                GlobalVariableSingleton.getInstance().getClient().connectToServer(allTanksDataFromKsl, new URI(uri));
                 allTanksDataFromKsl.sendMessage(getKslTankDataStr);
                 System.out.println(getKslTankDataStr);
                 ifWebsocketReady = true;
@@ -105,7 +100,7 @@ public class LavelMasterManager {
         // Get tanks settings     *******************************************************
         while (!ifTankSettingsWebsocketReady && kslDataInserted) {
             try {
-                client.connectToServer(tankSettingsData, new URI(uri));
+                GlobalVariableSingleton.getInstance().getClient().connectToServer(tankSettingsData, new URI(uri));
                 ifTankSettingsWebsocketReady = true;
 
                 for (Map.Entry<Integer, TankDataForMap> entry : tankMapData.entrySet()) {
@@ -151,7 +146,7 @@ public class LavelMasterManager {
         // Subscribe to tanks live data   ************** Subscribe to tanks live data **********************
         while (true) {
             try {
-                Thread.sleep(1000);
+                Thread.sleep(3000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -165,9 +160,9 @@ public class LavelMasterManager {
                     tankId.put("tankId", 0);
                     tankSubscription.put("setTankSubscriptionOn", tankId);
                     String tankSubscriptionStr = tankSubscription.toString();
-                    client.connectToServer(tankLiveDataSubscription, new URI(uri));
-                    tankLiveDataSubscription.sendMessage(tankSubscriptionStr);
-                    IfTankLiveDataSubscription = true;
+                    GlobalVariableSingleton.getInstance().getClient().connectToServer(liveDataWebsocketClient, new URI(uri));
+                    liveDataWebsocketClient.sendMessage(tankSubscriptionStr);
+
                 }
 
 
@@ -176,6 +171,8 @@ public class LavelMasterManager {
             } catch (DeploymentException e) {
                 System.out.println("Live Data Websocket not ready start websocket server.");
                 IfTankLiveDataSubscription = false;
+                DetectAndSaveAlarms.timer.cancel();
+                DetectAndSaveAlarms.timer.purge();
                 //  e.printStackTrace();
             } catch (IOException e) {
                 //   e.printStackTrace();
@@ -189,7 +186,7 @@ public class LavelMasterManager {
     } // LevelMaster engine
 
     public void printMapData() {
-        for (Map.Entry<Integer, TankDataForMap> entry : LavelMasterManager.tankMapData.entrySet()) {
+        for (Map.Entry<Integer, TankDataForMap> entry : LevelMasterManager.tankMapData.entrySet()) {
             System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
         }
     }

@@ -8,11 +8,9 @@ import com.kockumation.backEnd.levelMaster.model.KslTankData;
 import com.kockumation.backEnd.levelMaster.model.KslTanksData;
 import com.kockumation.backEnd.levelMaster.model.TankDataForMap;
 import com.kockumation.backEnd.utilities.MySQLJDBCUtil;
-import org.json.simple.JSONObject;
 
 import javax.websocket.*;
 import java.io.IOException;
-import java.net.URI;
 
 import java.sql.*;
 import java.util.List;
@@ -85,7 +83,7 @@ public class AllTanksDataFromKsl {
                 tankDataForMap.setVolume(kslTankData.getVolume());
                 tankDataForMap.setDensity(kslTankData.getDensity());
 
-                LavelMasterManager.tankMapData.put(index,tankDataForMap);
+                LevelMasterManager.tankMapData.put(index,tankDataForMap);
 
                 preparedStmt.setString(1, kslTankData.getTankCode());
                 preparedStmt.setFloat(2, kslTankData.getVolume());
@@ -126,7 +124,7 @@ public class AllTanksDataFromKsl {
                 tankDataForMap.setCode_name(kslTankData.getTankCode());
                 tankDataForMap.setVolume(kslTankData.getVolume());
                 tankDataForMap.setDensity(kslTankData.getDensity());
-                LavelMasterManager.tankMapData.put(index,tankDataForMap);
+                LevelMasterManager.tankMapData.put(index,tankDataForMap);
 
                 preparedStmt.setString(1, kslTankData.getTankCode());
                 preparedStmt.setFloat(2, kslTankData.getVolume());
@@ -208,11 +206,10 @@ public class AllTanksDataFromKsl {
 
     public void closeSession() {
         try {
-
             session.close();
         } catch (IOException ex) {
-
         }
-    }
+
+    }// Close Session ()
 
 }

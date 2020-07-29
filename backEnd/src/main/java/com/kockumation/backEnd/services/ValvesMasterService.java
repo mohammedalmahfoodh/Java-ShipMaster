@@ -35,20 +35,22 @@ public class ValvesMasterService {
             = Executors.newSingleThreadExecutor();
     private final String uri = "ws://192.168.190.232:8089";
     //  private final String uri = "ws://127.0.0.1:8089";
- WebSocketClient webSocketClient;
+    WebSocketClient webSocketClient;
     public static boolean ifValveAcknowledged = false;
+
     public ValvesMasterService() {
         webSocketClient = new WebSocketClient();
     }
 
     // Make Valve alarm Acknowledged *************** Make Valve alarm Acknowledged
     public Future<Boolean> makeAlarmAcknowledged(ValvePostObject valvePostObject) {
+        boolean acceptAlarm = false;
         if (ValvesMasterManager.valveMapData.containsKey(valvePostObject.getValve_id())) {
             ValveDataForMap valveDataForMap = ValvesMasterManager.valveMapData.get(valvePostObject.getValve_id());
-
-            if (valveDataForMap.getSubType() == 100){
+            System.out.println("Valve Alarm Accepted");
+            if (valveDataForMap.getSubType() == 100) {
                 String setAcceptValveSensor = "setAcceptLevelSensors";
-                String setAcceptValveSensorString ="{"+setAcceptValveSensor+":{}}";
+                String setAcceptValveSensorString = "{" + setAcceptValveSensor + ":{}}";
                 try {
                     GlobalVariableSingleton.getInstance().getClient().connectToServer(webSocketClient, new URI(uri));
                     webSocketClient.sendMessage(setAcceptValveSensorString);
@@ -66,26 +68,34 @@ public class ValvesMasterService {
                 } catch (URISyntaxException e) {
                     e.printStackTrace();
                 }
-                if (ifValveAcknowledged){
+                if (ifValveAcknowledged) {
                     return executor.submit(() -> {
                         return true;
                     });
                 }
 
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                String timeAccepted = LocalDateTime.now(Clock.systemUTC()).format(formatter);
-                valveDataForMap.setTime_accepted(timeAccepted);
-                valveDataForMap.setAlarm_description("Alarm accepted");
-                valveDataForMap.setAcknowledged(true);
-
-             updateValveAlarm(valveDataForMap);
-
             }//if (valveDataForMap.getSubType() == 100)
 
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            String timeAccepted = LocalDateTime.now(Clock.systemUTC()).format(formatter);
+            valveDataForMap.setTime_accepted(timeAccepted);
+            valveDataForMap.setAlarm_description("Alarm accepted");
+            valveDataForMap.setAcknowledged(true);
+            valveDataForMap.setUpdateRed(true);
+            valveDataForMap.setUpdateBlue(true);
+
+            try {
+                acceptAlarm = updateValveAlarm(valveDataForMap).get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+
         } else {
-          /*  return executor.submit(() -> {
+            return executor.submit(() -> {
                 return false;
-            });*/
+            });
         } // else
         return executor.submit(() -> {
             return true;
@@ -97,7 +107,7 @@ public class ValvesMasterService {
     public Future<Boolean> updateValveAlarm(ValveDataForMap valveDataForMap) {
 
         try (Connection conn = MySQLJDBCUtil.getConnection()) {
-            //  String query = "INSERT INTO alarms (alarm_name,tank_id,acknowledged,alarm_description,level_alarm,archive,alarm_date,time_accepted,alarm_active,blue_alarm,time_retrieved) VALUES (?,?,?,?,?,?,?,?,?,?,?);";
+
             String updateAlarms = "UPDATE alarms set alarm_name= ?,alarm_description = ?,blue_alarm = ?,alarm_date =? ,time_retrieved =?,alarm_active =?,time_accepted =?,acknowledged=?,valve_status = ? where (valve_id = ? && (archive = 0));";
             PreparedStatement preparedStmt = conn.prepareStatement(updateAlarms, Statement.RETURN_GENERATED_KEYS);
 
@@ -110,6 +120,7 @@ public class ValvesMasterService {
             preparedStmt.setString(7, valveDataForMap.getTime_accepted());
             preparedStmt.setBoolean(8, valveDataForMap.isAcknowledged());
             preparedStmt.setInt(9, valveDataForMap.getValve_status());
+            preparedStmt.setInt(10, valveDataForMap.getValve_id());
 
             int rowAffected = preparedStmt.executeUpdate();
 
@@ -120,7 +131,7 @@ public class ValvesMasterService {
             });
         }
         return executor.submit(() -> {
-            //  Thread.sleep(3000);
+
             return true;
         });
 

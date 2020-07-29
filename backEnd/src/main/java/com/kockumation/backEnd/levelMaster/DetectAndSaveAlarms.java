@@ -413,7 +413,7 @@ public class DetectAndSaveAlarms  {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                System.out.println("INside Level master detect alarms timer...");
+                System.out.println("Inside Level master detect alarms timer...");
                 if (LiveDataWebsocketClient.tankSubscriptionData != null) {
 
                     //  System.out.println("***** Level Alarms server is running *****");

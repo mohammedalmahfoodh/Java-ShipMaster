@@ -14,7 +14,7 @@ import java.util.concurrent.Future;
 @ClientEndpoint
 public class WebSocketClient {
 
-    private Session session;
+    public Session session;
     private ExecutorService executor
             = Executors.newSingleThreadExecutor();
 
@@ -22,7 +22,7 @@ public class WebSocketClient {
     public void onOpen(Session session) {
         this.session = session;
 
-        System.out.println("Make Valve Acknowledged websocket server opened....");
+      //  System.out.println("Make Valve Acknowledged websocket server opened....");
     }
 
     @OnMessage
@@ -56,13 +56,16 @@ public class WebSocketClient {
     @OnClose
     public Future<Boolean> onClose() throws IOException {
 
-
+         session = null;
         return executor.submit(() -> {
 
             System.out.println("Live Data WebSocket closed ");
 
             return true;
         });
+    }
+    public boolean isOpenOrNot(){
+        return session.isOpen();
     }
     public void closeSession() {
         try {

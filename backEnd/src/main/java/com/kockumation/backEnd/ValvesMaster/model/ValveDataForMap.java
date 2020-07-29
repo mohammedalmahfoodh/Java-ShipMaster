@@ -22,7 +22,8 @@ public class ValveDataForMap {
     private boolean updateRed;
 
     public ValveDataForMap() {
-
+          setUpdateRed(true);
+          setUpdateBlue(true);
     }
 
     public int getValve_id() {

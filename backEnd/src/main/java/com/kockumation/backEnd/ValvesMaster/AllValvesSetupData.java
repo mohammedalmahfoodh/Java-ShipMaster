@@ -50,17 +50,28 @@ public class AllValvesSetupData {
 
     // Create map valves with names *****************************************
     public Future<Boolean> createMapValvesWithNames() {
-        List<ValveIdAndName> valveIdAndNameList = getValvesNames.getListOfValvesNames().getValvesNames();
-        for (ValveIdAndName valveIdAndName : valveIdAndNameList) {
-            //   System.out.println(valveIdAndName);
-            ValveDataForMap valveDataForMap = new ValveDataForMap();
-            valveDataForMap.setValve_id(valveIdAndName.getId());
-            valveDataForMap.setValve_name(valveIdAndName.getValveName());
-            ValvesMasterManager.valveMapData.put(valveIdAndName.getId(), valveDataForMap);
+        System.out.println("Fetching valves names and ids....");
+        try {
+            List<ValveIdAndName> valveIdAndNameList = getValvesNames.getListOfValvesNames().getValvesNames();
+            for (ValveIdAndName valveIdAndName : valveIdAndNameList) {
+                //   System.out.println(valveIdAndName);
+                ValveDataForMap valveDataForMap = new ValveDataForMap();
+                valveDataForMap.setValve_id(valveIdAndName.getId());
+               String name =valveIdAndName.getValveName().isEmpty()?null:valveIdAndName.getValveName() ;
+                valveDataForMap.setValve_name(name);
+                ValvesMasterManager.valveMapData.put(valveIdAndName.getId(), valveDataForMap);
 
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error during fetching file names .... ");
+            return executor.submit(() -> {
+               // Thread.sleep(3300);
+                return false;
+            });
         }
         return executor.submit(() -> {
-
+            //  Thread.sleep(3000);
             return true;
         });
 
@@ -73,11 +84,11 @@ public class AllValvesSetupData {
             for (ValveSetting valveSetting : allValvesSetup.getSetSmAllValvesSetupData()) {
 
                 ValveDataForMap valveDataForMap = ValvesMasterManager.valveMapData.get(valveSetting.getId());
-                //   System.out.println(valveSetting);
+                valveDataForMap.setValve_type(valveSetting.getType());
                 valveDataForMap.setSubType(valveSetting.getSubType());
                 valveDataForMap.setValve_type(valveSetting.getType());
                 valveDataForMap.setErrorTimeout(valveSetting.getErrorTimeout());
-                //  ValvesMasterManager.valveMapData.put(valveSetting.getId(),valveDataForMap);
+                ValvesMasterManager.valveMapData.put(valveSetting.getId(), valveDataForMap);
             }
 
         } catch (NullPointerException e) {
@@ -90,7 +101,7 @@ public class AllValvesSetupData {
 
         return executor.submit(() -> {
 
-            System.out.println("Valves setup data populated now..");
+
             return true;
         });
 
@@ -132,23 +143,26 @@ public class AllValvesSetupData {
 
         try (Connection conn = MySQLJDBCUtil.getConnection()) {
             try {
-
                 String query = "  INSERT INTO valves (valve_id,valve_name,valve_type,valve_subType,errorTimeout) VALUES (?,?,?,?,?);";
                 PreparedStatement preparedStmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
 
-                for (ValveSetting valveSetting : allValvesSetup.getSetSmAllValvesSetupData()) {
+                ValvesMasterManager.valveMapData.entrySet().stream().forEach(e -> {
+                    try {
+                        preparedStmt.setInt(1, e.getValue().getValve_id());
+                        preparedStmt.setString(2, e.getValue().getValve_name());
+                        preparedStmt.setInt(3, e.getValue().getValve_type());
+                        preparedStmt.setInt(4, e.getValue().getSubType());
+                        preparedStmt.setInt(5, e.getValue().getErrorTimeout());
+                        int rowAffected = preparedStmt.executeUpdate();
 
-                    int valve_id = valveSetting.getId();
-                    preparedStmt.setInt(1, valve_id);
-                    preparedStmt.setString(2, valveSetting.getValve_name());
-                    preparedStmt.setInt(3, valveSetting.getType());
-                    preparedStmt.setInt(4, valveSetting.getSubType());
-                    preparedStmt.setInt(5, valveSetting.getErrorTimeout());
-                    int rowAffected = preparedStmt.executeUpdate();
+                    } catch (SQLException throwables) {
+                        throwables.printStackTrace();
+                    }
 
-                }
+                });
+
             } catch (NullPointerException e) {
-                System.out.print("All valves setup not exists connect to websocket server..");
+                System.out.print("All valves setup not exists connect to web socket server..");
                 return executor.submit(() -> {
 
                     return false;
@@ -156,6 +170,7 @@ public class AllValvesSetupData {
             }
         } catch (SQLException ex) {
             return executor.submit(() -> {
+                System.out.println("All valves settings inserted into valves table");
                 return false;
             });
 
@@ -174,24 +189,24 @@ public class AllValvesSetupData {
 
             try {
                 String updateTanks = "UPDATE valves set valve_name = ?,valve_type = ?,valve_subType = ?,errorTimeout = ? where valve_id = ?;";
-
                 PreparedStatement preparedStmt = conn.prepareStatement(updateTanks, Statement.RETURN_GENERATED_KEYS);
 
-                for (ValveSetting valveSetting : allValvesSetup.getSetSmAllValvesSetupData()) {
-                    int valve_id = valveSetting.getId();
+                ValvesMasterManager.valveMapData.entrySet().stream().forEach(e -> {
+                    try {
+                        preparedStmt.setString(1, e.getValue().getValve_name());
+                        preparedStmt.setInt(2, e.getValue().getValve_type());
+                        preparedStmt.setInt(3, e.getValue().getSubType());
+                        preparedStmt.setInt(4, e.getValue().getErrorTimeout());
+                        preparedStmt.setInt(5, e.getValue().getValve_id());
+                        int rowAffected = preparedStmt.executeUpdate();
 
-                    preparedStmt.setString(1, valveSetting.getValve_name());
-                    preparedStmt.setInt(2, valveSetting.getType());
-                    preparedStmt.setInt(3, valveSetting.getSubType());
-                    preparedStmt.setInt(4, valveSetting.getErrorTimeout());
-                    preparedStmt.setInt(5, valve_id);
-
-                    int rowAffected = preparedStmt.executeUpdate();
-
-                }
+                    } catch (SQLException throwables) {
+                        throwables.printStackTrace();
+                    }
+                });
 
             } catch (NullPointerException e) {
-                System.out.print("All valves setup not exists connect to websocket server..");
+                System.out.print("All valves setup not exists connect to web socket server..");
                 return executor.submit(() -> {
 
                     return false;
@@ -200,7 +215,7 @@ public class AllValvesSetupData {
 
             return executor.submit(() -> {
                 ValvesMasterManager.ifAllValvesSetupDataInserted = true;
-
+                System.out.println("All valves settings data updated");
                 return true;
             });
         } catch (SQLException ex) {
@@ -261,13 +276,11 @@ public class AllValvesSetupData {
             if (node.has("setSmAllValvesSetupData")) {
                 Gson gson = new Gson();
                 allValvesSetup = gson.fromJson(message, AllValvesSetup.class);
-
-                populateMapValvesWithSettings();
+                //   System.out.println(node);
                 closeSession();
-                //  closeSession();
-                //  session.close(new CloseReason(CloseCodes.NORMAL_CLOSURE, "Game ended"));
-            }else {
-                System.out.println(node);
+
+            } else {
+                //  System.out.println(node);
             }
 
         } catch (JsonProcessingException e) {
@@ -290,13 +303,26 @@ public class AllValvesSetupData {
     }
 
     @OnClose
-    public Future<Boolean> onClose() throws IOException {
+    public void onClose() throws IOException {
 
-        System.out.println("All valves settings data websocket Session closed.");
+
+    }
+
+    public Future<Boolean> isClosed() throws IOException {
 
         return executor.submit(() -> {
-            //  insertValvesSettings();
-            return true;
+            while (session.isOpen()) {
+
+            }
+            if (session.isOpen()) {
+                System.out.println("Session still open");
+
+                return false;
+            } else {
+                System.out.println("All valves settings data web Socket Session closed.");
+                return true;
+            }
+
         });
 
     }

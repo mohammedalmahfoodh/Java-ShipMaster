@@ -21,7 +21,8 @@ public class GetValvesNames {
             //  System.out.println(content);
 
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("No such file ");
+          //  e.printStackTrace();
         }
         // System.out.println(content);
         return content;
@@ -40,7 +41,7 @@ public class GetValvesNames {
         //  System.out.println(pontoonInformations.getPontoonInfo().get(2));
         //  DockConfig.getPontoonInfoString();
         try {
-            Thread.sleep(3000);
+            Thread.sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

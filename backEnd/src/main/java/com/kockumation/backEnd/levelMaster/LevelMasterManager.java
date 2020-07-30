@@ -1,0 +1,195 @@
+package com.kockumation.backEnd.levelMaster;
+
+import com.kockumation.backEnd.global.GlobalVariableSingleton;
+import com.kockumation.backEnd.levelMaster.model.TankDataForMap;
+import org.json.simple.JSONObject;
+
+import javax.websocket.DeploymentException;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+
+public class LevelMasterManager extends Thread {
+    //  private final String uri = "ws://localhost:8089";
+    private final String uri="ws://192.168.190.232:8089";
+  //  private final String  uri ="ws://127.0.0.1:8089";
+
+
+    AllTanksDataFromKsl allTanksDataFromKsl;
+    TankSettingsData tankSettingsData;
+    LiveDataWebsocketClient liveDataWebsocketClient;
+    public static Map<Integer, TankDataForMap> tankMapData = new HashMap<Integer, TankDataForMap>();
+    public static boolean kslDataInserted = false;
+    public static boolean kslWebSocketClosed = false;
+    public static boolean WebSocketSettingsClosed = false;
+    public static boolean checkIfDataExistsInDB = false;
+    public static boolean IfTankLiveDataSubscription = false;
+
+    public LevelMasterManager() {
+
+        allTanksDataFromKsl = new AllTanksDataFromKsl();
+        tankSettingsData = new TankSettingsData();
+        liveDataWebsocketClient = new LiveDataWebsocketClient();
+    }
+
+    public boolean checkIfInserted() {
+
+        return kslDataInserted;
+    }
+
+    @Override
+    public void run() {
+        levelMasterEngine();
+    }
+
+    public void levelMasterEngine() {
+
+        boolean ifWebsocketReady = false;
+        boolean ifTankSettingsWebsocketReady = false;
+
+        JSONObject getKslTankData = new JSONObject();
+        JSONObject vessel2 = new JSONObject();
+        vessel2.put("vessel", 1);
+        getKslTankData.put("getKslTankData", vessel2);
+        String getKslTankDataStr = getKslTankData.toString();
+
+
+        while (!ifWebsocketReady) {
+            try {
+
+                GlobalVariableSingleton.getInstance().getClient().connectToServer(allTanksDataFromKsl, new URI(uri));
+                allTanksDataFromKsl.sendMessage(getKslTankDataStr);
+                System.out.println(getKslTankDataStr);
+                ifWebsocketReady = true;
+
+                checkIfDataExistsInDB = allTanksDataFromKsl.checkIfDataExists().get();
+                if (checkIfDataExistsInDB) {
+                    System.out.println("Data exists in db");
+                    allTanksDataFromKsl.updateAllKslDataInTanks();
+                    kslDataInserted = true;
+                } else {
+                    System.out.println("No Data exists in db");
+                    kslDataInserted = allTanksDataFromKsl.insertAllKslDataIntoTanks(allTanksDataFromKsl.getKslTanksData().getSetKslTankData()).get();
+                    if (kslDataInserted) {
+                        System.out.println("Tanks info Inserted into database");
+                    } else {
+                        System.out.println("Tanks info not Inserted into database");
+                    }
+
+                }
+
+                allTanksDataFromKsl = null;
+
+
+            } catch (DeploymentException e) {
+                System.out.println("Websocket not ready start websocket server.");
+                ifWebsocketReady = false;
+                allTanksDataFromKsl = null;
+                //   e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (URISyntaxException | InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+
+        }// While
+
+        // Get tanks settings     *******************************************************
+        while (!ifTankSettingsWebsocketReady && kslDataInserted) {
+            try {
+                GlobalVariableSingleton.getInstance().getClient().connectToServer(tankSettingsData, new URI(uri));
+                ifTankSettingsWebsocketReady = true;
+
+                for (Map.Entry<Integer, TankDataForMap> entry : tankMapData.entrySet()) {
+                    JSONObject getTankSetting = new JSONObject();
+                    JSONObject tankId = new JSONObject();
+                    tankId.put("tankId", entry.getKey());
+                    getTankSetting.put("getTankSettingsData", tankId);
+                    String getTankSettingStr = getTankSetting.toString();
+                    tankSettingsData.sendMessage(getTankSettingStr);
+                    //    System.out.println("Key = " + entry.getKey() +
+                    //           ", Value = " + entry.getValue());
+                }
+
+                try {
+                    WebSocketSettingsClosed = tankSettingsData.onClose().get();
+
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                }
+                if (WebSocketSettingsClosed) {
+                    System.out.println("WebSocket Settings Closed Now.");
+                    tankSettingsData.updateAllTanksSettings().get();
+
+                }
+
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            } catch (DeploymentException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+
+
+        }  // Get tanks settings     *******************************************************
+
+        // Subscribe to tanks live data   ************** Subscribe to tanks live data **********************
+        while (true) {
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            try {
+
+                if (!IfTankLiveDataSubscription && kslDataInserted) {
+                    Thread.sleep(1000);
+                    JSONObject tankSubscription = new JSONObject();
+                    JSONObject tankId = new JSONObject();
+                    tankId.put("tankId", 0);
+                    tankSubscription.put("setTankSubscriptionOn", tankId);
+                    String tankSubscriptionStr = tankSubscription.toString();
+                    GlobalVariableSingleton.getInstance().getClient().connectToServer(liveDataWebsocketClient, new URI(uri));
+                    liveDataWebsocketClient.sendMessage(tankSubscriptionStr);
+
+                }
+
+
+            } catch (InterruptedException e) {
+                //e.printStackTrace();
+            } catch (DeploymentException e) {
+                System.out.println("Live Data Websocket not ready start websocket server.");
+                IfTankLiveDataSubscription = false;
+                DetectAndSaveAlarms.timer.cancel();
+                DetectAndSaveAlarms.timer.purge();
+                //  e.printStackTrace();
+            } catch (IOException e) {
+                //   e.printStackTrace();
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            }
+        }
+        // Subscribe to tanks live data   ************** Subscribe to tanks live data **********************
+
+
+    } // LevelMaster engine
+
+    public void printMapData() {
+        for (Map.Entry<Integer, TankDataForMap> entry : LevelMasterManager.tankMapData.entrySet()) {
+            System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
+        }
+    }
+
+
+}

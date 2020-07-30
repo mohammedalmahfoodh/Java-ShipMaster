@@ -15,40 +15,17 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.*;
 
-public class DetectAndSaveAlarms extends Thread {
+public class DetectAndSaveAlarms  {
     public static Timer timer;
-    public static boolean firstRun = true;
+
     private ExecutorService executor
             = Executors.newSingleThreadExecutor();
+    boolean makeAlarmsArchived = false;
 
-    public DetectAndSaveAlarms() {
+    public  void createNewTimer(){
         timer = new Timer();
+        detectAlarms();
     }
-
-    // Run function ****************  Run function ******************
-    public void run() {
-        //  System.out.println("Inside DetectAndSave Alarms " + Thread.currentThread());
-        while (!Thread.currentThread().isInterrupted() && firstRun) {
-
-            boolean makeAlarmsArchived = false;
-            try {
-                makeAlarmsArchived = makeUnresolvedAlarmsArchived().get();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
-            if (makeAlarmsArchived) {
-
-                System.out.println("Unresolved Alarms becomes Archived ");
-                firstRun = false;
-                detectAlarms();
-            } else {
-                System.out.println("Error connecting database connect to db to update alarms");
-            }
-
-        } // while (!Thread.currentThread().isInterrupted() && firstRun)
-    }// Run function ****************  Run function ******************
 
     // Make Unresolved Alarms Archived  ****************************** Make Unresolved Alarms Archived    ***************************************
     public Future<Boolean> makeUnresolvedAlarmsArchived() {
@@ -424,19 +401,28 @@ public class DetectAndSaveAlarms extends Thread {
     } // public void manageTemperatureAlarms(TankDataForMap tankDataForMap)
 
     public void detectAlarms() {
+        try {
+            makeAlarmsArchived = makeUnresolvedAlarmsArchived().get();
 
-        timer.schedule(new TimerTask() {
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
+        timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                if (TankLiveDataSubscription.tankSubscriptionData != null) {
+                System.out.println("Inside Level master detect alarms timer...");
+                if (LiveDataWebsocketClient.tankSubscriptionData != null) {
 
                     //  System.out.println("***** Level Alarms server is running *****");
 
-                    for (TankAlarmData tankAlarmData : TankLiveDataSubscription.tankSubscriptionData.getSetTankSubscriptionData()) {
-                        TankDataForMap tankDataForMap = LavelMasterManager.tankMapData.get(tankAlarmData.getTankId());
-                        if (tankDataForMap.getTank_id() == 11){
+                    for (TankAlarmData tankAlarmData : LiveDataWebsocketClient.tankSubscriptionData.getSetTankSubscriptionData()) {
+                        TankDataForMap tankDataForMap = LevelMasterManager.tankMapData.get(tankAlarmData.getTankId());
+                      /*  if (tankDataForMap.getTank_id() == 11){
                             System.out.println(tankDataForMap);
-                        }
+                        }*/
                         tankDataForMap.setMeanTemp(tankAlarmData.getMeanTemp());
                         tankDataForMap.setLevel(tankAlarmData.getLevel());
                         tankDataForMap.setVolume(tankAlarmData.getVolume());
@@ -487,7 +473,7 @@ public class DetectAndSaveAlarms extends Thread {
                                         tankDataForMap.setUpdateBlue(true);
                                         tankDataForMap.setBlue_alarm(false);
                                         tankDataForMap.setLevel_alarm(tankAlarmData.getLevelAlarm());
-                                        LavelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
+                                        LevelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
                                         try {
                                             if (tankDataForMap.isInserted()) {
 
@@ -539,7 +525,7 @@ public class DetectAndSaveAlarms extends Thread {
                                         tankDataForMap.setUpdateBlue(true);
                                         tankDataForMap.setBlue_alarm(false);
                                         tankDataForMap.setLevel_alarm(tankAlarmData.getLevelAlarm());
-                                        LavelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
+                                        LevelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
                                         try {
                                             if (tankDataForMap.isInserted()) {
 
@@ -592,7 +578,7 @@ public class DetectAndSaveAlarms extends Thread {
                                         tankDataForMap.setUpdateBlue(true);
                                         tankDataForMap.setBlue_alarm(false);
                                         tankDataForMap.setLevel_alarm(tankAlarmData.getLevelAlarm());
-                                        LavelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
+                                        LevelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
                                         //   System.out.println(LavelMasterManager.tankMapData.get(tankAlarmData.getTankId()));
                                         try {
                                             if (tankDataForMap.isInserted()) {
@@ -647,7 +633,7 @@ public class DetectAndSaveAlarms extends Thread {
                                         tankDataForMap.setUpdateBlue(true);
                                         tankDataForMap.setBlue_alarm(false);
                                         tankDataForMap.setLevel_alarm(tankAlarmData.getLevelAlarm());
-                                        LavelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
+                                        LevelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
                                         try {
                                             if (tankDataForMap.isInserted()) {
 
@@ -700,7 +686,7 @@ public class DetectAndSaveAlarms extends Thread {
                                     tankDataForMap.setUpdateBlue(true);
                                     tankDataForMap.setBlue_alarm(false);
                                     tankDataForMap.setLevel_alarm(tankAlarmData.getLevelAlarm());
-                                    LavelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
+                                    LevelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
                                     try {
                                         if (tankDataForMap.isInserted()) {
 
@@ -751,7 +737,7 @@ public class DetectAndSaveAlarms extends Thread {
                                     tankDataForMap.setUpdateBlue(true);
                                     tankDataForMap.setBlue_alarm(false);
                                     tankDataForMap.setLevel_alarm(tankAlarmData.getLevelAlarm());
-                                    LavelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
+                                    LevelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
                                     try {
                                         if (tankDataForMap.isInserted()) {
 
@@ -885,7 +871,7 @@ public class DetectAndSaveAlarms extends Thread {
                                         String alarmDateTriggered = LocalDateTime.now(Clock.systemUTC()).format(formatter);
                                         tankDataForMap.setTime_retrieved(alarmDateTriggered);
                                         tankDataForMap.setAlarm_description("Inactive unaccepted");
-                                        LavelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
+                                        LevelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
                                         try {
                                             if (tankDataForMap.isInserted()) {
 
@@ -931,7 +917,7 @@ public class DetectAndSaveAlarms extends Thread {
                                         String alarmDateTriggered = LocalDateTime.now(Clock.systemUTC()).format(formatter);
                                         tankDataForMap.setTime_retrieved(alarmDateTriggered);
                                         tankDataForMap.setAlarm_description("Inactive unaccepted");
-                                        LavelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
+                                        LevelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
                                         try {
                                             if (tankDataForMap.isInserted()) {
 
@@ -976,7 +962,7 @@ public class DetectAndSaveAlarms extends Thread {
                                     tankDataForMap.setTime_accepted(time_accepted);
                                     tankDataForMap.setAlarm_description("Active accepted");
                                     tankDataForMap.setLevel_alarm(tankAlarmData.getLevelAlarm());
-                                    LavelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
+                                    LevelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
                                     try {
                                         if (tankDataForMap.isInserted()) {
 
@@ -1070,6 +1056,6 @@ public class DetectAndSaveAlarms extends Thread {
 
 
             }
-        }, 400, 3000);
+        }, 1500, 3000);
     }
 }

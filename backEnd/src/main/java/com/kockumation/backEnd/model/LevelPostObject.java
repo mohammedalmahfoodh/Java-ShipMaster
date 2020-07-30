@@ -1,10 +1,8 @@
 package com.kockumation.backEnd.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.kockumation.backEnd.levelMaster.LavelMasterManager;
 
 
-import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 

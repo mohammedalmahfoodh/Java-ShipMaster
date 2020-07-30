@@ -9,7 +9,6 @@ import com.kockumation.backEnd.utilities.MySQLJDBCUtil;
 
 import javax.websocket.*;
 import java.io.IOException;
-import java.net.URI;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -36,9 +35,9 @@ public class TankSettingsData {
 
             String updateTanks = "UPDATE tanks SET low_alarm_limit = ?,low_low_alarm_limit = ?,high_alarm_limit =?,high_high_alarm_limit =?,max_volume=? where tank_id = ?;";
             PreparedStatement preparedStmt = conn.prepareStatement(updateTanks, Statement.RETURN_GENERATED_KEYS);
-            for (Map.Entry<Integer, TankDataForMap> entry : LavelMasterManager.tankMapData.entrySet()) {
+            for (Map.Entry<Integer, TankDataForMap> entry : LevelMasterManager.tankMapData.entrySet()) {
               //  System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue().getTankHighLevel());
-                TankDataForMap tankDataForMap = LavelMasterManager.tankMapData.get(entry.getKey());
+                TankDataForMap tankDataForMap = LevelMasterManager.tankMapData.get(entry.getKey());
 
                 if (tankDataForMap.getTankHighLevel() > tankDataForMap.getHighHighLevel()) {
 
@@ -62,7 +61,7 @@ public class TankSettingsData {
                 preparedStmt.setInt(6, tankDataForMap.getTank_id());
                 int rowAffected = preparedStmt.executeUpdate();
 
-                if (tankDataForMap.getTank_id() == LavelMasterManager.tankMapData.size()){
+                if (tankDataForMap.getTank_id() == LevelMasterManager.tankMapData.size()){
                     return executor.submit(() -> {
                         System.out.println("Tanks table with High,HighHigh,Low,LowLow and max volume values has been updated.");
 
@@ -108,7 +107,7 @@ public class TankSettingsData {
                 Gson gson = new Gson();
                 SetTankSettings setTankSettings = gson.fromJson(message, SetTankSettings.class);
                 TankSettingData tankSettingData = setTankSettings.getSetTankSettingsData();
-                TankDataForMap tankDataForMap = LavelMasterManager.tankMapData.get(tankSettingData.getTankId());
+                TankDataForMap tankDataForMap = LevelMasterManager.tankMapData.get(tankSettingData.getTankId());
 
                 tankDataForMap.setMax_volume(tankSettingData.getMaxVolume());
                 tankDataForMap.setTankHighLevel(tankSettingData.getHighLevel());
@@ -117,7 +116,7 @@ public class TankSettingsData {
                 tankDataForMap.setTankLowLowLevel(tankSettingData.getLowLowLevel());
 
 
-                if (setTankSettings.getSetTankSettingsData().getTankId() == LavelMasterManager.tankMapData.size()) {
+                if (setTankSettings.getSetTankSettingsData().getTankId() == LevelMasterManager.tankMapData.size()) {
 
                     closeSession();
                 }

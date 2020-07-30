@@ -7,10 +7,8 @@ import com.google.gson.Gson;
 import com.kockumation.backEnd.ValvesMaster.model.AllValvesSetup;
 import com.kockumation.backEnd.ValvesMaster.model.ValveDataForMap;
 import com.kockumation.backEnd.ValvesMaster.model.ValveSetting;
-import com.kockumation.backEnd.levelMaster.LevelMasterManager;
-import com.kockumation.backEnd.levelMaster.model.KslTankData;
-import com.kockumation.backEnd.levelMaster.model.KslTanksData;
-import com.kockumation.backEnd.levelMaster.model.TankDataForMap;
+
+import com.kockumation.backEnd.services.Db;
 import com.kockumation.backEnd.utilities.GetValvesNames;
 import com.kockumation.backEnd.utilities.MySQLJDBCUtil;
 import com.kockumation.backEnd.utilities.ValveIdAndName;
@@ -29,22 +27,13 @@ public class AllValvesSetupData {
 
     GetValvesNames getValvesNames;
     private AllValvesSetup allValvesSetup;
-    private ExecutorService executor;
+    private ExecutorService executor = Executors.newSingleThreadExecutor();
     private Session session;
     ValvesNames valvesNames;
 
-    public AllValvesSetup getAllValvesSetup() {
-        return allValvesSetup;
-    }
-
-    public void setAllValvesSetup(AllValvesSetup allValvesSetup) {
-        this.allValvesSetup = allValvesSetup;
-    }
 
     public AllValvesSetupData() {
         getValvesNames = new GetValvesNames();
-        allValvesSetup = new AllValvesSetup();
-        executor = Executors.newSingleThreadExecutor();
         valvesNames = new ValvesNames();
     }
 
@@ -57,21 +46,21 @@ public class AllValvesSetupData {
                 //   System.out.println(valveIdAndName);
                 ValveDataForMap valveDataForMap = new ValveDataForMap();
                 valveDataForMap.setValve_id(valveIdAndName.getId());
-               String name =valveIdAndName.getValveName().isEmpty()?null:valveIdAndName.getValveName() ;
+                String name = valveIdAndName.getValveName().isEmpty() ? null : valveIdAndName.getValveName();
                 valveDataForMap.setValve_name(name);
-                ValvesMasterManager.valveMapData.put(valveIdAndName.getId(), valveDataForMap);
+                Db.valveMapData.put(valveIdAndName.getId(), valveDataForMap);
 
             }
 
         } catch (Exception e) {
             System.out.println("Error during fetching file names .... ");
             return executor.submit(() -> {
-               // Thread.sleep(3300);
+                // Thread.sleep(3300);
                 return false;
             });
         }
         return executor.submit(() -> {
-            //  Thread.sleep(3000);
+
             return true;
         });
 
@@ -82,17 +71,19 @@ public class AllValvesSetupData {
 
         try {
             for (ValveSetting valveSetting : allValvesSetup.getSetSmAllValvesSetupData()) {
+                if (valveSetting.getSubType() != 99) {
+                    ValveDataForMap valveDataForMap = Db.valveMapData.get(valveSetting.getId());
+                    valveDataForMap.setValve_type(valveSetting.getType());
+                    valveDataForMap.setSubType(valveSetting.getSubType());
+                    valveDataForMap.setValve_type(valveSetting.getType());
+                    valveDataForMap.setErrorTimeout(valveSetting.getErrorTimeout());
+                    Db.valveMapData.put(valveSetting.getId(), valveDataForMap);
+                }
 
-                ValveDataForMap valveDataForMap = ValvesMasterManager.valveMapData.get(valveSetting.getId());
-                valveDataForMap.setValve_type(valveSetting.getType());
-                valveDataForMap.setSubType(valveSetting.getSubType());
-                valveDataForMap.setValve_type(valveSetting.getType());
-                valveDataForMap.setErrorTimeout(valveSetting.getErrorTimeout());
-                ValvesMasterManager.valveMapData.put(valveSetting.getId(), valveDataForMap);
             }
 
         } catch (NullPointerException e) {
-            System.out.print("All valves setup not exists connect to websocket server..");
+            System.out.print("All valves setup not exists connect to web socket server..");
             return executor.submit(() -> {
 
                 return false;
@@ -146,7 +137,7 @@ public class AllValvesSetupData {
                 String query = "  INSERT INTO valves (valve_id,valve_name,valve_type,valve_subType,errorTimeout) VALUES (?,?,?,?,?);";
                 PreparedStatement preparedStmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
 
-                ValvesMasterManager.valveMapData.entrySet().stream().forEach(e -> {
+                Db.valveMapData.entrySet().stream().forEach(e -> {
                     try {
                         preparedStmt.setInt(1, e.getValue().getValve_id());
                         preparedStmt.setString(2, e.getValue().getValve_name());
@@ -191,7 +182,7 @@ public class AllValvesSetupData {
                 String updateTanks = "UPDATE valves set valve_name = ?,valve_type = ?,valve_subType = ?,errorTimeout = ? where valve_id = ?;";
                 PreparedStatement preparedStmt = conn.prepareStatement(updateTanks, Statement.RETURN_GENERATED_KEYS);
 
-                ValvesMasterManager.valveMapData.entrySet().stream().forEach(e -> {
+                Db.valveMapData.entrySet().stream().forEach(e -> {
                     try {
                         preparedStmt.setString(1, e.getValue().getValve_name());
                         preparedStmt.setInt(2, e.getValue().getValve_type());
@@ -245,7 +236,7 @@ public class AllValvesSetupData {
                 valveDataForMap.setSubType(rs.getInt("valve_subtype"));
                 valveDataForMap.setErrorTimeout(rs.getInt("errorTimeout"));
                 valveDataForMap.setValve_name(getValvesNames.getListOfValvesNames().getValvesNames().get(valve_id - 1).getValveName());
-                ValvesMasterManager.valveMapData.put(valve_id, valveDataForMap);
+                Db.valveMapData.put(valve_id, valveDataForMap);
             }
 
         } catch (SQLException throwables) {

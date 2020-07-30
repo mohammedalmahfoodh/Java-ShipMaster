@@ -4,6 +4,8 @@ import com.kockumation.backEnd.ValvesMaster.DetectAndSaveValvesAlarms;
 import com.kockumation.backEnd.ValvesMaster.ValvesMasterManager;
 import com.kockumation.backEnd.global.GlobalVariableSingleton;
 import com.kockumation.backEnd.levelMaster.LevelMasterManager;
+import com.kockumation.backEnd.services.Db;
+import com.kockumation.backEnd.services.ValvesMasterService;
 import com.kockumation.backEnd.services.WebSocketClient;
 import com.kockumation.backEnd.utilities.MySQLJDBCUtil;
 import org.json.simple.JSONObject;
@@ -26,9 +28,7 @@ public class BackEndApplication {
 
     public static void main(String[] args) throws IOException, URISyntaxException, DeploymentException {
         SpringApplication.run(BackEndApplication.class, args);
-        System.out.println("listening on port " + 8081);
-
-
+        System.out.println("listening on port " + 3001);
         boolean checkDataBase = true;
         while (checkDataBase) {
 
@@ -42,33 +42,33 @@ public class BackEndApplication {
                 ValvesMasterManager valvesMasterManager;
 
                 // Try connecting to web socket
-
-
-
                 while (true) {
                     try {
-                        if (webSocketClient.session == null){
+                        if (webSocketClient.session == null) {
                             GlobalVariableSingleton.getInstance().getClient().connectToServer(webSocketClient, new URI(uri));
-                            System.out.println("web socket is Opened");
+                            System.out.println("web Socket is Opened");
+                            //   levelMasterManager = new LevelMasterManager();
+                            valvesMasterManager = new ValvesMasterManager();
+                            valvesMasterManager.start();
                         }
 
                     } catch (DeploymentException e) {
+                        ValvesMasterManager.ifAllValvesSetupDataInserted = false;
 
-                        System.out.println("Live Data Websocket not ready start websocket server.");
+                        // levelMasterManager = null;
+                        valvesMasterManager = null;
+                        Db.valveMapData.clear();
+
+                        System.out.println("Live Data Web Socket not ready start web Socket server.");
                     }
 
-                  
-
-                    // valvesMasterManager.start();
-                    //levelMasterManager.start();
-
-
                     try {
-                        Thread.sleep(6000);
+                        Thread.sleep(10000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                }
+
+                } // While true
 
 
             } catch (SQLException ex) {
@@ -89,19 +89,7 @@ public class BackEndApplication {
                 }
             }
 
-        }
-
-
-
-
-
-	/*JSONObject setTankSubscriptionOn = new JSONObject();
-		JSONObject tankId = new JSONObject();
-		tankId.put( "tankId",0);
-		setTankSubscriptionOn.put("setTankSubscriptionOn", tankId);
-		String setTankSubscriptionOnStr = setTankSubscriptionOn.toString();
-
-	//	allTanksDataFromKsl.sendMessage(setTankSubscriptionOnStr);*/
+        } // while (checkDataBase)
 
 
     }

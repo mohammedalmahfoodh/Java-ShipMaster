@@ -17,9 +17,9 @@ import java.util.concurrent.ExecutionException;
 @RestController
 @RequestMapping("/api")
 public class ValvesMasterController {
+
     @Autowired
     ValvesMasterService valvesMasterService;
-
 
 
     // Accept Valve Alarm  ****************   Accept Valve Alarm   *********************
@@ -27,12 +27,12 @@ public class ValvesMasterController {
     public ResponseEntity<String> acceptValveAlarm(@RequestBody @Valid ValvePostObject valvePostObject) {
 
         try {
-        boolean acceptedOrNot = valvesMasterService.makeAlarmAcknowledged(valvePostObject).get();
-        if (acceptedOrNot){
-            return new ResponseEntity<>("Valve id " + valvePostObject.getValve_id() + " Accepted", HttpStatus.OK);
-        }else {
-            return new ResponseEntity<>("Valve id " + valvePostObject.getValve_id() + " Not Accepted", HttpStatus.BAD_REQUEST);
-        }
+            boolean acceptedOrNot = valvesMasterService.makeAlarmAcknowledged(valvePostObject).get();
+            if (acceptedOrNot){
+                return new ResponseEntity<>("Valve id " + valvePostObject.getValve_id() + " Accepted", HttpStatus.OK);
+            }else {
+                return new ResponseEntity<>("Valve id " + valvePostObject.getValve_id() + " Not Accepted", HttpStatus.BAD_REQUEST);
+            }
 
         } catch (InterruptedException e) {
             e.printStackTrace();

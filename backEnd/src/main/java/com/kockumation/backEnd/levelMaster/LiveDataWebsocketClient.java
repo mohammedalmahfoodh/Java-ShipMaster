@@ -35,7 +35,6 @@ public class LiveDataWebsocketClient {
     @OnOpen
     public void onOpen(Session session) {
         this.session = session;
-
         detectAndSaveValvesAlarms.createNewTimer();
      //   detectAndSaveAlarms.createNewTimer();
 
@@ -55,9 +54,8 @@ public class LiveDataWebsocketClient {
                 valvesSubscriptionData = gson.fromJson(message, ValvesSubscriptionData.class);
                 //  System.out.println(node);
 
-                ValvesMasterManager.ifValveLiveDataSubscription = true;
-
             }
+
             if (node.has("setTankSubscriptionData")) {
                 System.out.println("Tanks live data");
                 //  System.out.println(node);
@@ -92,8 +90,8 @@ public class LiveDataWebsocketClient {
 
     @OnClose
     public Future<Boolean> onClose() throws IOException {
-        ValvesMasterManager.ifValveLiveDataSubscription = false;
-        LevelMasterManager.IfTankLiveDataSubscription = false;
+   //     ValvesMasterManager.ifValveLiveDataSubscription = false;
+    //    LevelMasterManager.IfTankLiveDataSubscription = false;
 //        DetectAndSaveAlarms.timer.cancel();
         DetectAndSaveValvesAlarms.timer.cancel();
         return executor.submit(() -> {

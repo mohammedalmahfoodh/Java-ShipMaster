@@ -35,18 +35,21 @@ public class ValvesMasterService {
             = Executors.newSingleThreadExecutor();
     private final String uri = "ws://192.168.190.232:8089";
     //  private final String uri = "ws://127.0.0.1:8089";
-    WebSocketClient webSocketClient;
+    WebSocketClient webSocketClient = new WebSocketClient();
     public static boolean ifValveAcknowledged = false;
+    ValvesMasterManager valvesMasterManager= new ValvesMasterManager();
 
-    public ValvesMasterService() {
-        webSocketClient = new WebSocketClient();
-    }
 
     // Make Valve alarm Acknowledged *************** Make Valve alarm Acknowledged
     public Future<Boolean> makeAlarmAcknowledged(ValvePostObject valvePostObject) {
         boolean acceptAlarm = false;
-        if (ValvesMasterManager.valveMapData.containsKey(valvePostObject.getValve_id())) {
-            ValveDataForMap valveDataForMap = ValvesMasterManager.valveMapData.get(valvePostObject.getValve_id());
+        int valve_id = valvePostObject.getValve_id();
+        ValveDataForMap valveDataForMap = new ValveDataForMap();
+        if (Db.valveMapData.containsKey(valve_id)){
+             valveDataForMap = Db.valveMapData.get(valve_id);
+
+        if (valveDataForMap.isAlarm_active() || valveDataForMap.isBlue_alarm() ) {
+
             System.out.println("Valve Alarm Accepted");
             if (valveDataForMap.getSubType() == 100) {
                 String setAcceptValveSensor = "setAcceptLevelSensors";
@@ -91,7 +94,7 @@ public class ValvesMasterService {
             } catch (ExecutionException e) {
                 e.printStackTrace();
             }
-
+        }
         } else {
             return executor.submit(() -> {
                 return false;

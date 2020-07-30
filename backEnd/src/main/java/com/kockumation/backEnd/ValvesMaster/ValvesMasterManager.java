@@ -2,7 +2,7 @@ package com.kockumation.backEnd.ValvesMaster;
 
 import com.kockumation.backEnd.global.GlobalVariableSingleton;
 import com.kockumation.backEnd.levelMaster.LiveDataWebsocketClient;
-import com.kockumation.backEnd.ValvesMaster.model.ValveDataForMap;
+
 import com.kockumation.backEnd.utilities.GetValvesNames;
 import org.json.simple.JSONObject;
 
@@ -10,10 +10,8 @@ import javax.websocket.DeploymentException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
+import java.util.concurrent.ExecutionException;
 
 public class ValvesMasterManager extends Thread {
 
@@ -22,11 +20,7 @@ public class ValvesMasterManager extends Thread {
     GetValvesNames getValvesNames;
     AllValvesSetupData allValvesSetup;
 
-
-    public static Map<Integer, ValveDataForMap> valveMapData = new HashMap<>();
     public static boolean ifAllValvesSetupDataInserted = false;
-    public static boolean ifValveLiveDataSubscription = false;
-    public static boolean checkIfDataExistsInValvesTable = false;
 
 
     @Override
@@ -37,8 +31,6 @@ public class ValvesMasterManager extends Thread {
     public ValvesMasterManager() {
         allValvesSetup = new AllValvesSetupData();
         getValvesNames = new GetValvesNames();
-
-
     }
 
     /// Valves Master Engine ********************************************************
@@ -71,12 +63,18 @@ public class ValvesMasterManager extends Thread {
             if (valvesIdAndNamesUpdated) {
                 System.out.println("Valves names updated");
 
+                // Wait for Web Socket server to send all valves settings.
+                try {
+                    System.out.println("Waiting for web socket server to load all valves settings.....");
+                    Thread.sleep(150000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 try {
                     GlobalVariableSingleton.getInstance().getClient().connectToServer(allValvesSetup, new URI(uri));
                     allValvesSetup.sendMessage(getAllValvesSetupDataString);
                     ifValvesSettingFetched = allValvesSetup.isClosed().get();
-                    //  System.out.println(ifValvesSettingFetched);
-                    //   iterateValvesMap();
+
                 } catch (DeploymentException e) {
                     System.out.println("Web Socket not connected");
                     //  e.printStackTrace();
@@ -136,131 +134,36 @@ public class ValvesMasterManager extends Thread {
         if (ifAllValvesSetupDataInserted) {
             System.out.println("Now settings installed....................");
 
-        while (true) {
             LiveDataWebsocketClient liveDataWebsocketClient = new LiveDataWebsocketClient();
             // Not yet subscribed but valves setup is already inserted or updated
-            if (!ifValveLiveDataSubscription ) {
-                 // iterateValvesMap();
-                JSONObject valveSubscription = new JSONObject();
-                JSONObject valveIdObject = new JSONObject();
-                valveIdObject.put("tankId", 0);
-                valveSubscription.put("setSmValveSubscriptionOn", valveIdObject);
-                String valveSubscriptionStr = valveSubscription.toString();
-                try {
 
-                    GlobalVariableSingleton.getInstance().getClient().connectToServer(liveDataWebsocketClient, new URI(uri));
-                    liveDataWebsocketClient.sendMessage(valveSubscriptionStr);
-
-
-                } catch (DeploymentException e) {
-
-                    DetectAndSaveValvesAlarms.timer.cancel();
-                    DetectAndSaveValvesAlarms.timer.purge();
-                    System.out.println("Live Data Websocket not ready start websocket server.");
-                    ifValveLiveDataSubscription = false;
-                    liveDataWebsocketClient = null;
-                    iterateValvesMap();
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (URISyntaxException e) {
-                    e.printStackTrace();
-                }
-
-            }
-
+            JSONObject valveSubscription = new JSONObject();
+            JSONObject valveIdObject = new JSONObject();
+            valveIdObject.put("tankId", 0);
+            valveSubscription.put("setSmValveSubscriptionOn", valveIdObject);
+            String valveSubscriptionStr = valveSubscription.toString();
             try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
 
-        }// While True
+                GlobalVariableSingleton.getInstance().getClient().connectToServer(liveDataWebsocketClient, new URI(uri));
+                liveDataWebsocketClient.sendMessage(valveSubscriptionStr);
 
-        }//if (ifAllValvesSetupDataInserted)
-
-
-
-
-
-
-
-
-           /* try {
-
-                GlobalVariableSingleton.getInstance().getClient().connectToServer(allValvesSetup, new URI(uri));
-                allValvesSetup.sendMessage(getAllValvesSetupDataString);
-
-                try {
-                    checkIfDataExistsInValvesTable = allValvesSetup.checkIfDataExists().get();
-                    if (checkIfDataExistsInValvesTable) {
-                        allValvesSetup.updateValveSetup();
-                        System.out.println("Valves setup updated now .");
-                    } else {
-                        //  System.out.println("Data existence is " + checkIfDataExistsInValvesTable);
-                        allValvesSetup.insertValvesSettings();
-                        System.out.println("Valves setup inserted into valve table.");
-                    }
-
-
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                }
 
             } catch (DeploymentException e) {
-                // e.printStackTrace();
+                DetectAndSaveValvesAlarms.timer.cancel();
+
+                System.out.println("Live Data Web socket not ready start web socket server.");
+
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (URISyntaxException e) {
                 e.printStackTrace();
-            }*/
-
-
-        // Subscribe to Valves live data   ************** Subscribe to Valves live data **********************
-      /*  while (true) {
-            try {
-                Thread.sleep(3000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            // Not yet subscribed but valves setup is already inserted or updated
-            if (!ifValveLiveDataSubscription && ifAllValvesSetupDataInserted) {
-                 // iterateValvesMap();
-                JSONObject valveSubscription = new JSONObject();
-                JSONObject valveIdObject = new JSONObject();
-                valveIdObject.put("tankId", 0);
-                valveSubscription.put("setSmValveSubscriptionOn", valveIdObject);
-                String valveSubscriptionStr = valveSubscription.toString();
-                try {
-
-                    GlobalVariableSingleton.getInstance().getClient().connectToServer(liveDataWebsocketClient, new URI(uri));
-                    liveDataWebsocketClient.sendMessage(valveSubscriptionStr);
-
-
-                } catch (DeploymentException e) {
-                    DetectAndSaveValvesAlarms.timer.cancel();
-                    DetectAndSaveValvesAlarms.timer.purge();
-                    System.out.println("Live Data Websocket not ready start websocket server.");
-                    ifValveLiveDataSubscription = false;
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (URISyntaxException e) {
-                    e.printStackTrace();
-                }
-
             }
 
-        }*/// While
+
+        }//if (ifAllValvesSetupDataInserted)
 
 
     } // Subscribe to Valves live data   ************** Subscribe to Valves live data **********************
-
-    public static void iterateValvesMap() {
-        valveMapData.entrySet().stream().forEach(e -> System.out.println(e.getKey() + ":" + e.getValue()));
-
-    }
 
 
 }

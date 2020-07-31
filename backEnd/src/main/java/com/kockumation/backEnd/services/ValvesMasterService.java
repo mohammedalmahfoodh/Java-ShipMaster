@@ -2,15 +2,11 @@ package com.kockumation.backEnd.services;
 
 import com.kockumation.backEnd.ValvesMaster.ValvesMasterManager;
 import com.kockumation.backEnd.ValvesMaster.model.ValveDataForMap;
+import com.kockumation.backEnd.global.Db;
 import com.kockumation.backEnd.global.GlobalVariableSingleton;
-import com.kockumation.backEnd.levelMaster.LevelMasterManager;
-import com.kockumation.backEnd.levelMaster.model.TankDataForMap;
-import com.kockumation.backEnd.model.LevelPostObject;
+import com.kockumation.backEnd.global.WebSocketClient;
 import com.kockumation.backEnd.model.ValvePostObject;
 import com.kockumation.backEnd.utilities.MySQLJDBCUtil;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.springframework.stereotype.Service;
 
 import javax.websocket.DeploymentException;
@@ -33,8 +29,8 @@ import java.util.concurrent.Future;
 public class ValvesMasterService {
     private ExecutorService executor
             = Executors.newSingleThreadExecutor();
-    private final String uri = "ws://192.168.190.232:8089";
-    //  private final String uri = "ws://127.0.0.1:8089";
+  //  private final String uri = "ws://192.168.190.232:8089";
+      private final String uri = GlobalVariableSingleton.getInstance().getLocaluri();
     WebSocketClient webSocketClient = new WebSocketClient();
     public static boolean ifValveAcknowledged = false;
     ValvesMasterManager valvesMasterManager= new ValvesMasterManager();

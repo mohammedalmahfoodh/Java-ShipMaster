@@ -1,7 +1,5 @@
 @ECHO OFF
-start java -jar F:\Java\Projects\Java-ShipMaster\ShipMaster.jar
-echo.
-echo.
+start java -jar %CD%\ShipMaster.jar
 echo Java running
 echo.
 echo.
@@ -14,10 +12,3 @@ echo.
 echo.
 echo.
 echo.
-echo.
-echo.
-echo.
-echo.
-echo.
-
-PAUSE

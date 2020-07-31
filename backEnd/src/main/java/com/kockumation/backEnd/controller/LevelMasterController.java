@@ -2,6 +2,7 @@ package com.kockumation.backEnd.controller;
 
 import com.kockumation.backEnd.model.Alarm;
 import com.kockumation.backEnd.model.LevelPostObject;
+import com.kockumation.backEnd.model.Tank;
 import com.kockumation.backEnd.services.LevelMasterService;
 import com.kockumation.backEnd.services.ValvesMasterService;
 import org.json.simple.JSONObject;
@@ -57,7 +58,34 @@ public class LevelMasterController {
 
     }// Get hundred Alarms  ****************   Get hundred Alarms   *********************
 
-    // Accept Temp Alarm  ****************   Accept Temp Alarm   *********************
+    // Get tanks Table  ****************   Get tanks Table   *********************
+    @GetMapping("/tanksTable")
+    public @ResponseBody
+    ResponseEntity<List<Tank>> getTankTable() {
+        List<Tank> tankTable = new ArrayList<>();
+        try {
+            tankTable = levelMasterService.getTanksTable().get();
+            if (tankTable.size() == 0) {
+                System.out.println("No Alarms");
+                return new ResponseEntity<List<Tank>>(tankTable, HttpStatus.NO_CONTENT);
+            }
+            return new ResponseEntity<List<Tank>>(tankTable, HttpStatus.OK);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return new ResponseEntity<List<Tank>>(tankTable, HttpStatus.BAD_REQUEST);
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+            return new ResponseEntity<List<Tank>>(tankTable, HttpStatus.BAD_REQUEST);
+        }
+
+    }// Get tanks Table  ****************   Get tanks Table   *********************
+
+
+
+
+
+
+    // Update tank low and high level  ****************   Update tank low and high level   *********************
     @PostMapping("/updateTankLAHA")
     public ResponseEntity<String> updateTankLowAndHighLimit(@RequestBody @Valid LevelPostObject levelPostObject) {
 
@@ -71,7 +99,7 @@ public class LevelMasterController {
             return new ResponseEntity<>("Tank id " + levelPostObject.getTank_id() + " Bad Request ", HttpStatus.BAD_REQUEST);
         }
 
-    }// Accept Temp Alarm  ****************   Accept Temp Alarm   *********************
+    }// Update tank low and high level  ****************   Update tank low and high level   *********************
 
     // Update tank density  ****************   Update tank density   *********************
     @PostMapping("/updateTankDensity")

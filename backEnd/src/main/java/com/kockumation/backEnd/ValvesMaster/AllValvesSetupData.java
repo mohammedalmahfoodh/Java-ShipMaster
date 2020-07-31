@@ -8,7 +8,7 @@ import com.kockumation.backEnd.ValvesMaster.model.AllValvesSetup;
 import com.kockumation.backEnd.ValvesMaster.model.ValveDataForMap;
 import com.kockumation.backEnd.ValvesMaster.model.ValveSetting;
 
-import com.kockumation.backEnd.services.Db;
+import com.kockumation.backEnd.global.Db;
 import com.kockumation.backEnd.utilities.GetValvesNames;
 import com.kockumation.backEnd.utilities.MySQLJDBCUtil;
 import com.kockumation.backEnd.utilities.ValveIdAndName;

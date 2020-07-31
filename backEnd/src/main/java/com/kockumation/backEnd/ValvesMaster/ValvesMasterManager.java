@@ -15,8 +15,8 @@ import java.util.concurrent.ExecutionException;
 
 public class ValvesMasterManager extends Thread {
 
-    private final String uri = "ws://192.168.190.232:8089";
-    //  private final String uri = "ws://127.0.0.1:8089";
+   // private final String uri = "ws://192.168.190.232:8089";
+      private final String uri = GlobalVariableSingleton.getInstance().getLocaluri();
     GetValvesNames getValvesNames;
     AllValvesSetupData allValvesSetup;
 
@@ -66,7 +66,7 @@ public class ValvesMasterManager extends Thread {
                 // Wait for Web Socket server to send all valves settings.
                 try {
                     System.out.println("Waiting for web socket server to load all valves settings.....");
-                    Thread.sleep(150000);
+                    Thread.sleep(300000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

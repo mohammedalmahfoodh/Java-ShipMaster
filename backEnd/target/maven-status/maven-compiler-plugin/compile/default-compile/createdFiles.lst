@@ -1,6 +1,7 @@
 com\kockumation\backEnd\ValvesMaster\model\AllValvesSetup.class
 com\kockumation\backEnd\levelMaster\LiveDataWebsocketClient.class
 com\kockumation\backEnd\levelMaster\TankSettingsData.class
+com\kockumation\backEnd\global\WebSocketClient.class
 com\kockumation\backEnd\levelMaster\DetectAndSaveAlarms.class
 com\kockumation\backEnd\ValvesMaster\AllValvesSetupData.class
 com\kockumation\backEnd\ValvesMaster\ValvesMasterManager.class
@@ -23,15 +24,14 @@ com\kockumation\backEnd\services\ValvesMasterService.class
 com\kockumation\backEnd\services\LevelMasterService.class
 com\kockumation\backEnd\TestWebsocketClient.class
 com\kockumation\backEnd\levelMaster\model\KslTankData.class
-com\kockumation\backEnd\services\WebSocketClient.class
 com\kockumation\backEnd\levelMaster\model\TankAlarmData.class
+com\kockumation\backEnd\global\Db.class
 com\kockumation\backEnd\model\Alarm.class
 com\kockumation\backEnd\levelMaster\model\KslTanksData.class
 com\kockumation\backEnd\controller\LevelMasterController.class
 com\kockumation\backEnd\model\ValvePostObject.class
 com\kockumation\backEnd\ValvesMaster\model\ValveAlarmData.class
 com\kockumation\backEnd\model\Tank.class
-com\kockumation\backEnd\controller\HelloWorld.class
 com\kockumation\backEnd\ValvesMaster\model\ValveDataForMap.class
 com\kockumation\backEnd\levelMaster\model\TankSettingData.class
 com\kockumation\backEnd\utilities\GetValvesNames.class

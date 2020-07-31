@@ -1,5 +1,8 @@
 package com.kockumation.backEnd.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Tank {
     private int tank_id;
     private String code_name;

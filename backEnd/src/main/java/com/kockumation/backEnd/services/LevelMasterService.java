@@ -1,10 +1,11 @@
 package com.kockumation.backEnd.services;
 
+import com.kockumation.backEnd.global.Db;
 import com.kockumation.backEnd.levelMaster.DetectAndSaveAlarms;
-import com.kockumation.backEnd.levelMaster.LevelMasterManager;
 import com.kockumation.backEnd.levelMaster.model.TankDataForMap;
 import com.kockumation.backEnd.model.Alarm;
 import com.kockumation.backEnd.model.LevelPostObject;
+import com.kockumation.backEnd.model.Tank;
 import com.kockumation.backEnd.utilities.MySQLJDBCUtil;
 import org.springframework.stereotype.Service;
 
@@ -26,8 +27,8 @@ public class LevelMasterService {
 
     //Make temp alarm Acknowledged ******************** Make temp alarm Acknowledged ****************************************************
     public boolean makeTempAlarmAcknowledged(int tank_id) {
-        if (LevelMasterManager.tankMapData.containsKey(tank_id)) {
-            TankDataForMap tankDataForMap = LevelMasterManager.tankMapData.get(tank_id);
+        if (Db.tankMapData.containsKey(tank_id)) {
+            TankDataForMap tankDataForMap = Db.tankMapData.get(tank_id);
             if ((tankDataForMap.isTemp_alarm_active() == true || tankDataForMap.isTemp_blue_alarm() == true) && tankDataForMap.isTemp_acknowledged() == false) {
 
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -118,10 +119,55 @@ public class LevelMasterService {
 
     }//Get  a list of latest 100 alarms from MySql. ******************** Get  a list of latest 100 alarms from MySql. ****************************************************
 
+    //Get tanks table from MySql. ******************** Get tanks table from MySql. ****************************************************
+    public Future<List<Tank>> getTanksTable() {
+        List<Tank> tankTable = new ArrayList<>();
+        try (Connection conn = MySQLJDBCUtil.getConnection()) {
+            String query = "select t.tank_id,t.code_name,t.tank_level,t.volume,t.volume_percent,t.weight,t.density,t.low_alarm_limit,t.high_alarm_limit,\n" +
+                    "    t.low_low_alarm_limit,t.high_high_alarm_limit,t.alarm_name\n" +
+                    "    from   tanks t";
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+
+            while (rs.next()) {
+                Tank tank = new Tank();
+                tank.setTank_id(rs.getInt("tank_id"));
+                tank.setCode_name(rs.getString("code_name"));
+                tank.setTank_level(rs.getFloat("tank_level"));
+                tank.setVolume(rs.getFloat("volume"));
+                tank.setVolume_percent(rs.getFloat("volume_percent"));
+                tank.setWeight(rs.getFloat("weight"));
+                tank.setDensity(rs.getFloat("density"));
+                tank.setLow_alarm_limit(rs.getFloat("low_alarm_limit"));
+                tank.setHigh_alarm_limit(rs.getFloat("high_alarm_limit"));
+                tank.setLow_low_alarm_limit(rs.getFloat("low_low_alarm_limit"));
+                tank.setHigh_high_alarm_limit(rs.getFloat("high_high_alarm_limit"));
+                tank.setAlarm_name(rs.getString("alarm_name"));
+                tankTable.add(tank);
+
+            }
+
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+            return executor.submit(() -> {
+                return tankTable;
+            });
+        } // End of catch
+        return executor.submit(() -> {
+            return tankTable;
+        });
+
+    }//Get tanks table from MySql. ******************** Get tanks table from MySql. ****************************************************
+
+
+
+
+
+
     // update Tanks Low limit and High limit ***** update Tanks Low limit and High limit
     public Future<Boolean> updateTankLowAndHighLimit(LevelPostObject levelPostObject) {
-        if (LevelMasterManager.tankMapData.containsKey(levelPostObject.getTank_id())) {
-            TankDataForMap tankDataForMap = LevelMasterManager.tankMapData.get(levelPostObject.getTank_id());
+        if (Db.tankMapData.containsKey(levelPostObject.getTank_id())) {
+            TankDataForMap tankDataForMap = Db.tankMapData.get(levelPostObject.getTank_id());
             tankDataForMap.setTankLowLevel(levelPostObject.getLow_alarm_limit());
             tankDataForMap.setTankHighLevel(levelPostObject.getHigh_alarm_limit());
 
@@ -155,8 +201,8 @@ public class LevelMasterService {
 
     // Update Tanks Density ***** Update Tanks Density   **************  Update Tanks Density
     public Future<Boolean> updateTankDensity(LevelPostObject levelPostObject) {
-        if (LevelMasterManager.tankMapData.containsKey(levelPostObject.getTank_id())) {
-            TankDataForMap tankDataForMap = LevelMasterManager.tankMapData.get(levelPostObject.getTank_id());
+        if (Db.tankMapData.containsKey(levelPostObject.getTank_id())) {
+            TankDataForMap tankDataForMap = Db.tankMapData.get(levelPostObject.getTank_id());
             tankDataForMap.setDensity(levelPostObject.getDensity());
 
             try (Connection conn = MySQLJDBCUtil.getConnection()) {
@@ -188,8 +234,8 @@ public class LevelMasterService {
 
     // Set temperature limit  ******** Set temperature limit   **************  Set temperature limit
     public Future<Boolean> setTemperatureLimit(LevelPostObject levelPostObject) {
-        if (LevelMasterManager.tankMapData.containsKey(levelPostObject.getTank_id())) {
-            TankDataForMap tankDataForMap = LevelMasterManager.tankMapData.get(levelPostObject.getTank_id());
+        if (Db.tankMapData.containsKey(levelPostObject.getTank_id())) {
+            TankDataForMap tankDataForMap = Db.tankMapData.get(levelPostObject.getTank_id());
             tankDataForMap.setTemperature_limit(levelPostObject.getTemp_limit());
 
             try (Connection conn = MySQLJDBCUtil.getConnection()) {

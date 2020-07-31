@@ -4,7 +4,7 @@ import com.kockumation.backEnd.ValvesMaster.model.ValveAlarmData;
 import com.kockumation.backEnd.ValvesMaster.model.ValveDataForMap;
 import com.kockumation.backEnd.levelMaster.LiveDataWebsocketClient;
 
-import com.kockumation.backEnd.services.Db;
+import com.kockumation.backEnd.global.Db;
 import com.kockumation.backEnd.utilities.MySQLJDBCUtil;
 
 

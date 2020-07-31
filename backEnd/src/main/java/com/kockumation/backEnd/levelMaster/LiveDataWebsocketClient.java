@@ -35,9 +35,8 @@ public class LiveDataWebsocketClient {
     @OnOpen
     public void onOpen(Session session) {
         this.session = session;
-        detectAndSaveValvesAlarms.createNewTimer();
-     //   detectAndSaveAlarms.createNewTimer();
-
+          detectAndSaveValvesAlarms.createNewTimer();
+        detectAndSaveAlarms.createNewTimer();
         System.out.println("Live data web socket opened....");
     }
 
@@ -49,7 +48,7 @@ public class LiveDataWebsocketClient {
         try {
             node = mapper.readTree(message);
             if (node.has("setSmValveSubscriptionData")) {
-             //   System.out.println("Valves live data");
+                //   System.out.println("Valves live data");
                 Gson gson = new Gson();
                 valvesSubscriptionData = gson.fromJson(message, ValvesSubscriptionData.class);
                 //  System.out.println(node);
@@ -57,11 +56,11 @@ public class LiveDataWebsocketClient {
             }
 
             if (node.has("setTankSubscriptionData")) {
-                System.out.println("Tanks live data");
+
                 //  System.out.println(node);
                 Gson gson = new Gson();
                 tankSubscriptionData = gson.fromJson(message, TankSubscriptionData.class);
-                LevelMasterManager.IfTankLiveDataSubscription = true;
+
 
                 //   System.out.println(tankSubscriptionData.getSetTankSubscriptionData());
 
@@ -90,14 +89,11 @@ public class LiveDataWebsocketClient {
 
     @OnClose
     public Future<Boolean> onClose() throws IOException {
-   //     ValvesMasterManager.ifValveLiveDataSubscription = false;
-    //    LevelMasterManager.IfTankLiveDataSubscription = false;
-//        DetectAndSaveAlarms.timer.cancel();
-        DetectAndSaveValvesAlarms.timer.cancel();
+
+        DetectAndSaveAlarms.timer.cancel();
+//        DetectAndSaveValvesAlarms.timer.cancel();
         return executor.submit(() -> {
-
             System.out.println("Live Data WebSocket closed ");
-
             return true;
         });
     }

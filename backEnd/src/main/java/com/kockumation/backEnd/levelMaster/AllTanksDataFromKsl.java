@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.kockumation.backEnd.global.Db;
 import com.kockumation.backEnd.levelMaster.model.KslTankData;
 import com.kockumation.backEnd.levelMaster.model.KslTanksData;
 import com.kockumation.backEnd.levelMaster.model.TankDataForMap;
@@ -48,20 +49,20 @@ public class AllTanksDataFromKsl {
             if (rs.next()) {
                 //    System.out.println(rs.getString(2));
                 return executor.submit(() -> {
-                  //  Thread.sleep(2000);
+                    Thread.sleep(2000);
                     return true;
                 });
             } else {
                 //   System.out.println(rs);
                 return executor.submit(() -> {
-                 //   Thread.sleep(2000);
+                   Thread.sleep(2000);
                     return false;
                 });
             }
         } catch (SQLException ex) {
             System.out.println(ex.getMessage());
             return executor.submit(() -> {
-           //     Thread.sleep(2000);
+
                 return false;
             });
         }
@@ -83,7 +84,7 @@ public class AllTanksDataFromKsl {
                 tankDataForMap.setVolume(kslTankData.getVolume());
                 tankDataForMap.setDensity(kslTankData.getDensity());
 
-                LevelMasterManager.tankMapData.put(index,tankDataForMap);
+                Db.tankMapData.put(index,tankDataForMap);
 
                 preparedStmt.setString(1, kslTankData.getTankCode());
                 preparedStmt.setFloat(2, kslTankData.getVolume());
@@ -124,7 +125,7 @@ public class AllTanksDataFromKsl {
                 tankDataForMap.setCode_name(kslTankData.getTankCode());
                 tankDataForMap.setVolume(kslTankData.getVolume());
                 tankDataForMap.setDensity(kslTankData.getDensity());
-                LevelMasterManager.tankMapData.put(index,tankDataForMap);
+                Db.tankMapData.put(index,tankDataForMap);
 
                 preparedStmt.setString(1, kslTankData.getTankCode());
                 preparedStmt.setFloat(2, kslTankData.getVolume());

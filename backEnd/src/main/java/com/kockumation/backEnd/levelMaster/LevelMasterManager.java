@@ -1,5 +1,6 @@
 package com.kockumation.backEnd.levelMaster;
 
+import com.kockumation.backEnd.global.Db;
 import com.kockumation.backEnd.global.GlobalVariableSingleton;
 import com.kockumation.backEnd.levelMaster.model.TankDataForMap;
 import org.json.simple.JSONObject;
@@ -8,25 +9,23 @@ import javax.websocket.DeploymentException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 public class LevelMasterManager extends Thread {
     //  private final String uri = "ws://localhost:8089";
-    private final String uri="ws://192.168.190.232:8089";
-  //  private final String  uri ="ws://127.0.0.1:8089";
+  //  private final String uri = "ws://192.168.190.232:8089";
+      private final String  uri = GlobalVariableSingleton.getInstance().getLocaluri();
 
 
     AllTanksDataFromKsl allTanksDataFromKsl;
     TankSettingsData tankSettingsData;
     LiveDataWebsocketClient liveDataWebsocketClient;
-    public static Map<Integer, TankDataForMap> tankMapData = new HashMap<Integer, TankDataForMap>();
-    public static boolean kslDataInserted = false;
-    public static boolean kslWebSocketClosed = false;
-    public static boolean WebSocketSettingsClosed = false;
-    public static boolean checkIfDataExistsInDB = false;
-    public static boolean IfTankLiveDataSubscription = false;
+    boolean kslDataInserted = false;
+
+
+
+
 
     public LevelMasterManager() {
 
@@ -62,10 +61,11 @@ public class LevelMasterManager extends Thread {
 
                 GlobalVariableSingleton.getInstance().getClient().connectToServer(allTanksDataFromKsl, new URI(uri));
                 allTanksDataFromKsl.sendMessage(getKslTankDataStr);
-                System.out.println(getKslTankDataStr);
-                ifWebsocketReady = true;
 
+                ifWebsocketReady = true;
+                boolean checkIfDataExistsInDB = false;
                 checkIfDataExistsInDB = allTanksDataFromKsl.checkIfDataExists().get();
+
                 if (checkIfDataExistsInDB) {
                     System.out.println("Data exists in db");
                     allTanksDataFromKsl.updateAllKslDataInTanks();
@@ -83,9 +83,8 @@ public class LevelMasterManager extends Thread {
 
                 allTanksDataFromKsl = null;
 
-
             } catch (DeploymentException e) {
-                System.out.println("Websocket not ready start websocket server.");
+                System.out.println("Web socket not ready start web socket server.");
                 ifWebsocketReady = false;
                 allTanksDataFromKsl = null;
                 //   e.printStackTrace();
@@ -103,7 +102,7 @@ public class LevelMasterManager extends Thread {
                 GlobalVariableSingleton.getInstance().getClient().connectToServer(tankSettingsData, new URI(uri));
                 ifTankSettingsWebsocketReady = true;
 
-                for (Map.Entry<Integer, TankDataForMap> entry : tankMapData.entrySet()) {
+                for (Map.Entry<Integer, TankDataForMap> entry : Db.tankMapData.entrySet()) {
                     JSONObject getTankSetting = new JSONObject();
                     JSONObject tankId = new JSONObject();
                     tankId.put("tankId", entry.getKey());
@@ -113,7 +112,7 @@ public class LevelMasterManager extends Thread {
                     //    System.out.println("Key = " + entry.getKey() +
                     //           ", Value = " + entry.getValue());
                 }
-
+               boolean WebSocketSettingsClosed = false;
                 try {
                     WebSocketSettingsClosed = tankSettingsData.onClose().get();
 
@@ -140,56 +139,40 @@ public class LevelMasterManager extends Thread {
                 e.printStackTrace();
             }
 
-
         }  // Get tanks settings     *******************************************************
 
         // Subscribe to tanks live data   ************** Subscribe to tanks live data **********************
-        while (true) {
-            try {
-                Thread.sleep(3000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        try {
+
+            if (kslDataInserted) {
+                Thread.sleep(1000);
+                JSONObject tankSubscription = new JSONObject();
+                JSONObject tankId = new JSONObject();
+                tankId.put("tankId", 0);
+                tankSubscription.put("setTankSubscriptionOn", tankId);
+                String tankSubscriptionStr = tankSubscription.toString();
+                GlobalVariableSingleton.getInstance().getClient().connectToServer(liveDataWebsocketClient, new URI(uri));
+                liveDataWebsocketClient.sendMessage(tankSubscriptionStr);
             }
 
-            try {
+        } catch (InterruptedException e) {
+            //e.printStackTrace();
+        } catch (DeploymentException e) {
+            System.out.println("Live Data Web socket not ready start web socket server.");
 
-                if (!IfTankLiveDataSubscription && kslDataInserted) {
-                    Thread.sleep(1000);
-                    JSONObject tankSubscription = new JSONObject();
-                    JSONObject tankId = new JSONObject();
-                    tankId.put("tankId", 0);
-                    tankSubscription.put("setTankSubscriptionOn", tankId);
-                    String tankSubscriptionStr = tankSubscription.toString();
-                    GlobalVariableSingleton.getInstance().getClient().connectToServer(liveDataWebsocketClient, new URI(uri));
-                    liveDataWebsocketClient.sendMessage(tankSubscriptionStr);
+            DetectAndSaveAlarms.timer.cancel();
 
-                }
-
-
-            } catch (InterruptedException e) {
-                //e.printStackTrace();
-            } catch (DeploymentException e) {
-                System.out.println("Live Data Websocket not ready start websocket server.");
-                IfTankLiveDataSubscription = false;
-                DetectAndSaveAlarms.timer.cancel();
-                DetectAndSaveAlarms.timer.purge();
-                //  e.printStackTrace();
-            } catch (IOException e) {
-                //   e.printStackTrace();
-            } catch (URISyntaxException e) {
-                e.printStackTrace();
-            }
+            //  e.printStackTrace();
+        } catch (IOException e) {
+            //   e.printStackTrace();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
         }
         // Subscribe to tanks live data   ************** Subscribe to tanks live data **********************
 
 
     } // LevelMaster engine
 
-    public void printMapData() {
-        for (Map.Entry<Integer, TankDataForMap> entry : LevelMasterManager.tankMapData.entrySet()) {
-            System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
-        }
-    }
 
 
 }

@@ -1,27 +1,22 @@
 package com.kockumation.backEnd;
 
-import com.kockumation.backEnd.ValvesMaster.DetectAndSaveValvesAlarms;
 import com.kockumation.backEnd.ValvesMaster.ValvesMasterManager;
 import com.kockumation.backEnd.global.GlobalVariableSingleton;
 import com.kockumation.backEnd.levelMaster.LevelMasterManager;
-import com.kockumation.backEnd.services.Db;
-import com.kockumation.backEnd.services.ValvesMasterService;
-import com.kockumation.backEnd.services.WebSocketClient;
+import com.kockumation.backEnd.global.Db;
+import com.kockumation.backEnd.global.WebSocketClient;
 import com.kockumation.backEnd.utilities.MySQLJDBCUtil;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import javax.websocket.DeploymentException;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Properties;
 
 @SpringBootApplication
 public class BackEndApplication {
@@ -34,10 +29,12 @@ public class BackEndApplication {
 
             try (Connection conn = MySQLJDBCUtil.getConnection()) {
                 checkDataBase = false;
+                WebSocketClient webSocketClient = new WebSocketClient();
+
+                String uriLocalIp = GlobalVariableSingleton.getInstance().getLocaluri();
+
                 System.out.println(String.format("Connected to database %s " + "successfully.", conn.getCatalog()));
 
-                WebSocketClient webSocketClient = new WebSocketClient();
-                final String uri = "ws://192.168.190.232:8089";
                 LevelMasterManager levelMasterManager;
                 ValvesMasterManager valvesMasterManager;
 
@@ -45,19 +42,24 @@ public class BackEndApplication {
                 while (true) {
                     try {
                         if (webSocketClient.session == null) {
-                            GlobalVariableSingleton.getInstance().getClient().connectToServer(webSocketClient, new URI(uri));
+                            GlobalVariableSingleton.getInstance().getClient().connectToServer(webSocketClient, new URI(uriLocalIp));
                             System.out.println("web Socket is Opened");
-                            //   levelMasterManager = new LevelMasterManager();
-                            valvesMasterManager = new ValvesMasterManager();
-                            valvesMasterManager.start();
+                            levelMasterManager = new LevelMasterManager();
+                            levelMasterManager.start();
+
+                              valvesMasterManager = new ValvesMasterManager();
+                              valvesMasterManager.start();
+
                         }
 
                     } catch (DeploymentException e) {
-                        ValvesMasterManager.ifAllValvesSetupDataInserted = false;
 
-                        // levelMasterManager = null;
+                        levelMasterManager = null;
                         valvesMasterManager = null;
+                            ValvesMasterManager.ifAllValvesSetupDataInserted = false;
+
                         Db.valveMapData.clear();
+                        Db.tankMapData.clear();
 
                         System.out.println("Live Data Web Socket not ready start web Socket server.");
                     }
@@ -82,7 +84,7 @@ public class BackEndApplication {
                         break;
                 }
                 try {
-                    Thread.sleep(3000);
+                    Thread.sleep(4000);
                     checkDataBase = true;
                 } catch (InterruptedException e) {
                     e.printStackTrace();

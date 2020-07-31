@@ -1,5 +1,6 @@
 package com.kockumation.backEnd.levelMaster;
 
+import com.kockumation.backEnd.global.Db;
 import com.kockumation.backEnd.levelMaster.model.TankAlarmData;
 import com.kockumation.backEnd.levelMaster.model.TankDataForMap;
 import com.kockumation.backEnd.utilities.MySQLJDBCUtil;
@@ -413,14 +414,14 @@ public class DetectAndSaveAlarms  {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                System.out.println("Inside Level master detect alarms timer...");
+
                 if (LiveDataWebsocketClient.tankSubscriptionData != null) {
 
-                    //  System.out.println("***** Level Alarms server is running *****");
+                      System.out.println("***** Level Alarms server is running *****");
 
                     for (TankAlarmData tankAlarmData : LiveDataWebsocketClient.tankSubscriptionData.getSetTankSubscriptionData()) {
-                        TankDataForMap tankDataForMap = LevelMasterManager.tankMapData.get(tankAlarmData.getTankId());
-                      /*  if (tankDataForMap.getTank_id() == 11){
+                        TankDataForMap tankDataForMap = Db.tankMapData.get(tankAlarmData.getTankId());
+                     /*   if (tankDataForMap.getTank_id() == 5){
                             System.out.println(tankDataForMap);
                         }*/
                         tankDataForMap.setMeanTemp(tankAlarmData.getMeanTemp());
@@ -473,7 +474,7 @@ public class DetectAndSaveAlarms  {
                                         tankDataForMap.setUpdateBlue(true);
                                         tankDataForMap.setBlue_alarm(false);
                                         tankDataForMap.setLevel_alarm(tankAlarmData.getLevelAlarm());
-                                        LevelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
+                                        Db.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
                                         try {
                                             if (tankDataForMap.isInserted()) {
 
@@ -525,7 +526,7 @@ public class DetectAndSaveAlarms  {
                                         tankDataForMap.setUpdateBlue(true);
                                         tankDataForMap.setBlue_alarm(false);
                                         tankDataForMap.setLevel_alarm(tankAlarmData.getLevelAlarm());
-                                        LevelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
+                                        Db.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
                                         try {
                                             if (tankDataForMap.isInserted()) {
 
@@ -578,7 +579,7 @@ public class DetectAndSaveAlarms  {
                                         tankDataForMap.setUpdateBlue(true);
                                         tankDataForMap.setBlue_alarm(false);
                                         tankDataForMap.setLevel_alarm(tankAlarmData.getLevelAlarm());
-                                        LevelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
+                                        Db.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
                                         //   System.out.println(LavelMasterManager.tankMapData.get(tankAlarmData.getTankId()));
                                         try {
                                             if (tankDataForMap.isInserted()) {
@@ -633,7 +634,7 @@ public class DetectAndSaveAlarms  {
                                         tankDataForMap.setUpdateBlue(true);
                                         tankDataForMap.setBlue_alarm(false);
                                         tankDataForMap.setLevel_alarm(tankAlarmData.getLevelAlarm());
-                                        LevelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
+                                        Db.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
                                         try {
                                             if (tankDataForMap.isInserted()) {
 
@@ -686,7 +687,7 @@ public class DetectAndSaveAlarms  {
                                     tankDataForMap.setUpdateBlue(true);
                                     tankDataForMap.setBlue_alarm(false);
                                     tankDataForMap.setLevel_alarm(tankAlarmData.getLevelAlarm());
-                                    LevelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
+                                    Db.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
                                     try {
                                         if (tankDataForMap.isInserted()) {
 
@@ -737,7 +738,7 @@ public class DetectAndSaveAlarms  {
                                     tankDataForMap.setUpdateBlue(true);
                                     tankDataForMap.setBlue_alarm(false);
                                     tankDataForMap.setLevel_alarm(tankAlarmData.getLevelAlarm());
-                                    LevelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
+                                    Db.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
                                     try {
                                         if (tankDataForMap.isInserted()) {
 
@@ -871,7 +872,7 @@ public class DetectAndSaveAlarms  {
                                         String alarmDateTriggered = LocalDateTime.now(Clock.systemUTC()).format(formatter);
                                         tankDataForMap.setTime_retrieved(alarmDateTriggered);
                                         tankDataForMap.setAlarm_description("Inactive unaccepted");
-                                        LevelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
+                                        Db.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
                                         try {
                                             if (tankDataForMap.isInserted()) {
 
@@ -917,7 +918,7 @@ public class DetectAndSaveAlarms  {
                                         String alarmDateTriggered = LocalDateTime.now(Clock.systemUTC()).format(formatter);
                                         tankDataForMap.setTime_retrieved(alarmDateTriggered);
                                         tankDataForMap.setAlarm_description("Inactive unaccepted");
-                                        LevelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
+                                        Db.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
                                         try {
                                             if (tankDataForMap.isInserted()) {
 
@@ -962,7 +963,7 @@ public class DetectAndSaveAlarms  {
                                     tankDataForMap.setTime_accepted(time_accepted);
                                     tankDataForMap.setAlarm_description("Active accepted");
                                     tankDataForMap.setLevel_alarm(tankAlarmData.getLevelAlarm());
-                                    LevelMasterManager.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
+                                    Db.tankMapData.put(tankDataForMap.getTank_id(), tankDataForMap);
                                     try {
                                         if (tankDataForMap.isInserted()) {
 
@@ -1056,6 +1057,6 @@ public class DetectAndSaveAlarms  {
 
 
             }
-        }, 1500, 3000);
+        }, 1500, 4000);
     }
 }
